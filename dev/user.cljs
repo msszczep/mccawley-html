@@ -1,5 +1,5 @@
 (ns cljs.user
-  (:require [mccawley-reagent.core :as core]
+  (:require [mccawley-html.core :as core]
             [figwheel.client :as figwheel :include-macros true]))
 
 (enable-console-print!)
