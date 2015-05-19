@@ -1,4 +1,4 @@
-(ns mccawley-reagent.core
+(ns mccawley-html.core
   (:require [reagent.core :as reagent :refer [atom]]
             [ajax.core :refer [GET POST]]))
 
@@ -20,7 +20,7 @@
 
 
 ;; function to call when we click on parse button
-(defn retrieve-pos [param]
+(defn retrieve-parsed [param]
   (let [uri (str "http://localhost:3000/parse/" param)]
   (GET uri {:handler handler
             :error-handler error-handler
@@ -29,7 +29,7 @@
 
 
 ;; function to render the page, react/reagent style!
-(defn hw []
+(defn display-page []
    [:div
      [:h2 "Parsed-text: " @parsed-text]
      [:p "t has value: " @t]
@@ -37,9 +37,9 @@
               :value @t
               :on-change #(reset! t (-> % .-target .-value))}]
      [:p]
-     [:button {:on-click #(retrieve-pos @t)}
+     [:button {:on-click #(retrieve-parsed @t)}
       "Parse"]])
 
 
 (defn main []
-  (reagent/render-component [hw] (.getElementById js/document "app")))
+  (reagent/render-component [display-page] (.getElementById js/document "app")))
