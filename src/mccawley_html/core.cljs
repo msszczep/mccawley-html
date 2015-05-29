@@ -2,7 +2,6 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [ajax.core :refer [GET POST]]))
 
-
 (enable-console-print!)
 
 ;; Define 2 reagent atoms we need for state
@@ -22,11 +21,63 @@
 ;; function to call when we click on parse button
 (defn retrieve-parsed [param]
   (let [uri (str "http://localhost:3000/parse/" param)]
-  (GET uri {:handler handler
-            :error-handler error-handler
-            :response-format :json
-            :keywords? true})))
+    (GET uri {:handler handler
+              :error-handler error-handler
+              :response-format :json
+              :keywords? true})))
 
+;; The rendering happens here
+(def svg (-> js/d3
+             (.select "svg")
+             (.attr "width" "500")
+             (.attr "height" "500")
+             (.attr "id" "visualization")
+             (.attr "xmlns" "http://www.w3.org/2000/svg")))
+
+(def tree (-> js/d3
+              (.-layout)
+              (.tree)
+              (.size [300 300])))
+
+(def d2 {:pos "ROOT", :word "", :children []})
+;(def d2 {:pos "ROOT", :word "My", :children [{:pos "S" :word "goodness" :children []}]})
+;(def d2 [{:x 100 :y 100} {:x 50 :y 50} {:x 150 :y 150} {:x 250 :y 350}])
+
+(def nodes (-> tree
+               (.nodes (clj->js d2))))
+
+;(def links (-> tree
+;               (.links nodes)))
+
+;(def line (-> js/d3.svg
+;              (.line)
+;              (.x (fn [d] (.x d)))
+;              (.y (fn [d] (.y d)))
+;              (.interpolate "linear")))
+
+;(defn pow [n p]
+;  (.pow js/Math n p))
+
+;(defn get-euclidean-distance [d]
+;  (pow (+ (pow (- (.x (first d)) (.x (last d))) 2)
+;          (pow (- (.y (first d)) (.y (last d))) 2)) 0.5))
+
+;(defn xy-helper [i]
+;  [{x i.target.x, y i.target.y} {x i.source.x, y i.source.y}])
+
+(-> svg
+    (.selectAll "circle")
+    (.data nodes)
+    (.enter)
+    (.append "circle")
+    (.attr "cx" "100")
+    (.attr "cy" "100")
+    (.attr "r" "10")
+    (.attr "fill" "steelblue"))
+;    .-transition)
+;    (.delay (fn [d] (if (= (.depth d) 1000) 3000 0)))
+;    (.duration (fn [d] 1000))
+;    (.attr "r" 10))
 
 ;; function to render the page, react/reagent style!
 (defn display-page []
@@ -37,9 +88,9 @@
               :value @t
               :on-change #(reset! t (-> % .-target .-value))}]
      [:p]
-     [:button {:on-click #(retrieve-parsed @t)}
-      "Parse"]])
-
+     [:button {:on-click #(retrieve-parsed @t)} "Parse"]
+     [:p]
+    ])
 
 (defn main []
   (reagent/render-component [display-page] (.getElementById js/document "app")))

@@ -16,7 +16,8 @@
                  [leiningen "2.5.0"]
                  [reagent "0.5.0"]
                  [cljs-ajax "0.3.11"]
-                 [clj-time "0.9.0"]]
+                 [clj-time "0.9.0"]
+                 [org.clojure/math.numeric-tower "0.0.4"]]
 
   :min-lein-version "2.5.0"
 
@@ -30,6 +31,6 @@
   :cljsbuild {:builds {:app {:source-paths ["src" "dev"]
                              :compiler {:output-to "resources/public/js/app.js"
                                         :output-dir "resources/public/js/out"
-                                        :source-map    "resources/public/js/out.js.map"
+                                        :source-map "resources/public/js/out.js.map"
                                         :optimizations :none}}}}
   )

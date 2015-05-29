@@ -1,9 +1,21 @@
 <!DOCTYPE html>
 <html>
+<style type="text/css">
+  #canvas {
+    width: 500px;
+    margin: 20px 0;
+    height: 500px;
+    background: #eee;
+  }
+</style>
   <body>
 
     <div id="app"></div>
+    <div id="canvas">
+      <svg></svg>
+    </div>
 
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script> 
     <script src="/js/out/goog/base.js" type="text/javascript"></script>
     <script src="/js/app.js" type="text/javascript"></script>
     <script type="text/javascript">goog.require('cljs.user');</script>
