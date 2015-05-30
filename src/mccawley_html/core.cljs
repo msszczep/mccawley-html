@@ -19,25 +19,52 @@
                 (.attr "id" "visualization")
                 (.attr "xmlns" "http://www.w3.org/2000/svg"))
         tree (-> js/d3
-                (.-layout)
-                (.tree)
-                (.size (clj->js [1000 400])))
+                 (.-layout)
+                 (.tree)
+                 (.size (clj->js [1000 400])))
         nodes (-> tree
-                (.nodes (clj->js clj-tree)))
-        ]
-    (-> svg
-        ;(.append "text")
-        ;(.text clj-tree)
-        ;(.attr "x" 100)
-        ;(.attr "y" 100))))
-        (.selectAll "circle")
-        (.data nodes)
-        (.enter)
+                  (.nodes (clj->js clj-tree)))
+        links (-> tree
+                  (.links nodes))
+        content (-> svg
+                    (.selectAll "g")
+                    (.data nodes)
+                    (.enter)
+                    (.append "g")
+                    (.attr "transform" "translate(0,0)"))]
+    (-> content
         (.append "circle")
         (.attr "cx" (fn [o] (int (.-x o))))
         (.attr "cy" (fn [o] (int (.-y o))))
         (.attr "r" "10")
-        (.attr "fill" "black"))))
+        (.attr "fill" "yellow"))
+    (-> content
+        (.append "text")
+        (.text (fn [o] (.-word o)))
+        (.attr "x" (fn [o] (int (.-x o))))
+        (.attr "y" (fn [o] (int (.-y o))))
+        (.attr "fill" "black"))
+    ))
+
+    ;(.transition)
+    ;(.delay "5000")
+    ;(.attr "r" "10")
+
+    ;(def line (-> js/d3.svg
+;              (.line)
+;              (.x (fn [o] (.-x o)))
+;              (.y (fn [o] (.-y o)))
+;              (.interpolate "linear")))
+
+;(defn pow [n p]
+;  (.pow js/Math n p))
+
+;(defn get-euclidean-distance [d]
+;  (pow (+ (pow (- (.x (first d)) (.x (last d))) 2)
+;          (pow (- (.y (first d)) (.y (last d))) 2)) 0.5))
+
+;(defn xy-helper [i]
+;  [{x i.target.x, y i.target.y} {x i.source.x, y i.source.y}])
 
 
 ;; Handle GET request to our external service
@@ -59,38 +86,7 @@
               :response-format :json
               :keywords? true})))
 
-;(def links (-> tree
-;               (.links nodes)))
 
-;(-> svg
-;    (.selectAll "circle")
-;    (.data nodes)
-;    (.enter)
-;    (.append "circle")
-;    (.attr "cx" (fn [o] (int (.-x o))))
-;    (.attr "cy" (fn [o] (int (.-y o))))
-;    (.attr "r" "10")
-;    (.attr "fill" "black")
-    ;(.transition)
-    ;(.delay "5000")
-    ;(.attr "r" "10")
-;    )
-
-;(def line (-> js/d3.svg
-;              (.line)
-;              (.x (fn [o] (.-x o)))
-;              (.y (fn [o] (.-y o)))
-;              (.interpolate "linear")))
-
-;(defn pow [n p]
-;  (.pow js/Math n p))
-
-;(defn get-euclidean-distance [d]
-;  (pow (+ (pow (- (.x (first d)) (.x (last d))) 2)
-;          (pow (- (.y (first d)) (.y (last d))) 2)) 0.5))
-
-;(defn xy-helper [i]
-;  [{x i.target.x, y i.target.y} {x i.source.x, y i.source.y}])
 
 ;; function to render the page, react/reagent style!
 (defn display-page []
