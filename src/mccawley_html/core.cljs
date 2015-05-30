@@ -1,18 +1,51 @@
 (ns mccawley-html.core
   (:require [reagent.core :as reagent :refer [atom]]
-            [ajax.core :refer [GET POST]]))
+            [ajax.core :refer [GET POST]]
+            [cljs.reader :as reader]))
 
 (enable-console-print!)
 
 ;; Define 2 reagent atoms we need for state
 (def parsed-text (reagent/atom ""))
-(def t (reagent/atom ""))
+(def start-text (reagent/atom ""))
+
+; The displaying happens here
+(defn display-tree [tree-to-display]
+  (let [clj-tree (reader/read-string tree-to-display)
+        svg (-> js/d3
+                (.select "svg")
+                (.attr "width" "1000")
+                (.attr "height" "500")
+                (.attr "id" "visualization")
+                (.attr "xmlns" "http://www.w3.org/2000/svg"))
+        tree (-> js/d3
+                (.-layout)
+                (.tree)
+                (.size (clj->js [1000 400])))
+        nodes (-> tree
+                (.nodes (clj->js clj-tree)))
+        ]
+    (-> svg
+        ;(.append "text")
+        ;(.text clj-tree)
+        ;(.attr "x" 100)
+        ;(.attr "y" 100))))
+        (.selectAll "circle")
+        (.data nodes)
+        (.enter)
+        (.append "circle")
+        (.attr "cx" (fn [o] (int (.-x o))))
+        (.attr "cy" (fn [o] (int (.-y o))))
+        (.attr "r" "10")
+        (.attr "fill" "black"))))
 
 
 ;; Handle GET request to our external service
 (defn handler [response]
-  (reset! parsed-text (:parsed-text response))
-  (.log js/console (:parsed-text response)))
+  (do
+    (reset! parsed-text (:parsed-text response))
+    (display-tree @parsed-text)
+    (.log js/console (:parsed-text response))))
 
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "something bad happened: " status " " status-text)))
@@ -26,26 +59,22 @@
               :response-format :json
               :keywords? true})))
 
-;; The rendering happens here
-(def svg (-> js/d3
-             (.select "svg")
-             (.attr "width" "500")
-             (.attr "height" "500")
-             (.attr "id" "visualization")
-             (.attr "xmlns" "http://www.w3.org/2000/svg")))
+;(def links (-> tree
+;               (.links nodes)))
 
-(def tree (-> js/d3
-              (.-layout)
-              (.tree)
-              (.size (clj->js [300 300]))))
-
-(def d2 {:pos "ROOT", :word "", :children [{:pos "S", :word "", :children [{:pos "NP", :word "", :children [{:pos "NNP", :word "Jesus", :children []},]},{:pos "VP", :word "", :children [{:pos "VBD", :word "wept", :children []},]},{:pos ".", :word ".", :children []},]},]})
-
-(def nodes (-> tree
-               (.nodes (clj->js d2))))
-
-(def links (-> tree
-               (.links nodes)))
+;(-> svg
+;    (.selectAll "circle")
+;    (.data nodes)
+;    (.enter)
+;    (.append "circle")
+;    (.attr "cx" (fn [o] (int (.-x o))))
+;    (.attr "cy" (fn [o] (int (.-y o))))
+;    (.attr "r" "10")
+;    (.attr "fill" "black")
+    ;(.transition)
+    ;(.delay "5000")
+    ;(.attr "r" "10")
+;    )
 
 ;(def line (-> js/d3.svg
 ;              (.line)
@@ -63,31 +92,16 @@
 ;(defn xy-helper [i]
 ;  [{x i.target.x, y i.target.y} {x i.source.x, y i.source.y}])
 
-(-> svg
-    (.selectAll "circle")
-    (.data nodes)
-    (.enter)
-    (.append "circle")
-    (.attr "cx" (fn [o] (int (.-x o))))
-    (.attr "cy" (fn [o] (int (.-y o))))
-    (.attr "r" "10")
-    (.attr "fill" "steelblue")
-    )
-;    .-transition)
-;    (.delay (fn [d] (if (= (.depth d) 1000) 3000 0)))
-;    (.duration (fn [d] 1000))
-;    (.attr "r" 10))
-
 ;; function to render the page, react/reagent style!
 (defn display-page []
    [:div
      [:h2 "Parsed-text: " @parsed-text]
-     [:p "t has value: " @t]
+     [:p "start-text has value: " @start-text]
      [:input {:type "text"
-              :value @t
-              :on-change #(reset! t (-> % .-target .-value))}]
+              :value @start-text
+              :on-change #(reset! start-text (-> % .-target .-value))}]
      [:p]
-     [:button {:on-click #(retrieve-parsed @t)} "Parse"]
+     [:button {:on-click #(retrieve-parsed @start-text)} "Parse"]
      [:p]
     ])
 

@@ -16,8 +16,7 @@
                  [leiningen "2.5.0"]
                  [reagent "0.5.0"]
                  [cljs-ajax "0.3.11"]
-                 [clj-time "0.9.0"]
-                 [org.clojure/math.numeric-tower "0.0.4"]]
+                 [clj-time "0.9.0"]]
 
   :min-lein-version "2.5.0"
 
