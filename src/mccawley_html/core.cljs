@@ -37,22 +37,20 @@
 (def tree (-> js/d3
               (.-layout)
               (.tree)
-              (.size [300 300])))
+              (.size (clj->js [300 300]))))
 
-(def d2 {:pos "ROOT", :word "", :children []})
-;(def d2 {:pos "ROOT", :word "My", :children [{:pos "S" :word "goodness" :children []}]})
-;(def d2 [{:x 100 :y 100} {:x 50 :y 50} {:x 150 :y 150} {:x 250 :y 350}])
+(def d2 {:pos "ROOT", :word "", :children [{:pos "S", :word "", :children [{:pos "NP", :word "", :children [{:pos "NNP", :word "Jesus", :children []},]},{:pos "VP", :word "", :children [{:pos "VBD", :word "wept", :children []},]},{:pos ".", :word ".", :children []},]},]})
 
 (def nodes (-> tree
                (.nodes (clj->js d2))))
 
-;(def links (-> tree
-;               (.links nodes)))
+(def links (-> tree
+               (.links nodes)))
 
 ;(def line (-> js/d3.svg
 ;              (.line)
-;              (.x (fn [d] (.x d)))
-;              (.y (fn [d] (.y d)))
+;              (.x (fn [o] (.-x o)))
+;              (.y (fn [o] (.-y o)))
 ;              (.interpolate "linear")))
 
 ;(defn pow [n p]
@@ -70,10 +68,11 @@
     (.data nodes)
     (.enter)
     (.append "circle")
-    (.attr "cx" "100")
-    (.attr "cy" "100")
+    (.attr "cx" (fn [o] (int (.-x o))))
+    (.attr "cy" (fn [o] (int (.-y o))))
     (.attr "r" "10")
-    (.attr "fill" "steelblue"))
+    (.attr "fill" "steelblue")
+    )
 ;    .-transition)
 ;    (.delay (fn [d] (if (= (.depth d) 1000) 3000 0)))
 ;    (.duration (fn [d] 1000))
