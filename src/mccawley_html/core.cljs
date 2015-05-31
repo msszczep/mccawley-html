@@ -26,42 +26,64 @@
                   (.nodes (clj->js clj-tree)))
         links (-> tree
                   (.links nodes))
-        content (-> svg
+        node-content (-> svg
                     (.selectAll "g")
                     (.data nodes)
                     (.enter)
                     (.append "g")
                     (.attr "transform" "translate(0,0)"))]
-    (letfn [(make-line [o] (-> js/d3.svg
+    (letfn [(make-line [o] (-> js/d3
+                              (.-svg)
                               (.line)
-                              (.x (fn [o] (:x o)))
-                              (.y (fn [o] (:y o)))
+                              (.x (fn [o] (.-x o)))
+                              (.y (fn [o] (.-y o)))
                               (.interpolate "linear")))
-            (pow [n p] (.pow js/Math n p))]
-      (-> content
+            (pow [n p] (.pow js/Math n p))
+            (get-euclidean-distance [d]
+                                    (pow (+ (pow (- (:x (first d))
+                                                    (:x (last d))) 2)
+                                            (pow (- (:y (first d))
+                                                    (:y (last d))) 2)) 0.5))
+            (xy-helper [i]
+                       (vector {:x (-.x (.-target i))
+                         :y (.-y (.-target i))}
+                        {:x (.-x (.-source i))
+                         :y (.-y (.-source i))}))
+            (path-drawer [i]
+                         (str "M" (.-x (.-source i)) "," (.-y (.-source i))
+                              "L" (.-x (.-target i)) "," (.-y (.-target i))))]
+      (-> node-content
           (.append "circle")
           (.attr "cx" (fn [o] (int (.-x o))))
           (.attr "cy" (fn [o] (int (.-y o))))
           (.attr "r" "10")
           (.attr "fill" "orange"))
-      (-> content
+      (-> node-content
           (.append "text")
           (.text (fn [o] (.-word o)))
           (.attr "x" (fn [o] (int (.-x o))))
           (.attr "y" (fn [o] (int (.-y o))))
           (.attr "fill" "black"))
-    )))
+      (-> svg
+          (.selectAll "path")
+          (.data links)
+          (.enter)
+          (.append "path")
+          (.attr "d" (fn [i] (path-drawer i)))
+          (.attr "stroke" "steelblue")
+          (.attr "stroke-width" "2")
+          (.attr "fill" "none")
+          ))))
 
     ;(.transition)
     ;(.delay "5000")
     ;(.attr "r" "10")
 
-;(defn get-euclidean-distance [d]
-;  (pow (+ (pow (- (.x (first d)) (.x (last d))) 2)
-;          (pow (- (.y (first d)) (.y (last d))) 2)) 0.5))
-
-;(defn xy-helper [i]
-;  [{x i.target.x, y i.target.y} {x i.source.x, y i.source.y}])
+;     .transition()
+;       .delay(function (d) {return 1000;})
+;       .duration(function (d) {return 2000;})
+;       .ease("linear")
+;       .attr("stroke-dashoffset", 0);
 
 
 ;; Handle GET request to our external service
@@ -88,6 +110,7 @@
 (defn display-page []
   [:div
    [:h2 "McCawley"]
+   [:p "Type an English sentence and press \"Parse\"."]
    [:input {:type "text"
             :value @start-text
             :on-change #(reset! start-text (-> % .-target .-value))}]
@@ -95,9 +118,6 @@
    [:button {:on-click #(retrieve-parsed @start-text)} "Parse"]
    [:p]
   ])
-
-;   [:h2 "Parsed-text: " @parsed-text]
-;   [:p "start-text has value: " @start-text]
 
 (defn main []
   (reagent/render-component [display-page] (.getElementById js/document "app")))
