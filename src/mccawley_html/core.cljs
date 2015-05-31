@@ -27,39 +27,26 @@
         links (-> tree
                   (.links nodes))
         node-content (-> svg
-                    (.selectAll "g")
-                    (.data nodes)
-                    (.enter)
-                    (.append "g")
-                    (.attr "transform" "translate(0,0)"))]
-    (letfn [(make-line [o] (-> js/d3
-                              (.-svg)
-                              (.line)
-                              (.x (fn [o] (.-x o)))
-                              (.y (fn [o] (.-y o)))
-                              (.interpolate "linear")))
-            (pow [n p] (.pow js/Math n p))
-            (get-euclidean-distance [d]
-                                    (pow (+ (pow (- (:x (first d))
-                                                    (:x (last d))) 2)
-                                            (pow (- (:y (first d))
-                                                    (:y (last d))) 2)) 0.5))
-            (xy-helper [i]
-                       (vector {:x (-.x (.-target i))
-                         :y (.-y (.-target i))}
-                        {:x (.-x (.-source i))
-                         :y (.-y (.-source i))}))
-            (path-drawer [i]
+                         (.selectAll "g")
+                         (.data nodes)
+                         (.enter)
+                         (.append "g")
+                         (.attr "transform" "translate(0,0)"))]
+    (letfn [(path-drawer [i]
                          (str "M" (.-x (.-source i)) "," (.-y (.-source i))
                               "L" (.-x (.-target i)) "," (.-y (.-target i))))]
       (-> node-content
           (.append "circle")
           (.attr "cx" (fn [o] (int (.-x o))))
           (.attr "cy" (fn [o] (int (.-y o))))
-          (.attr "r" "10")
-          (.attr "fill" "orange"))
+          (.attr "fill" "orange")
+          (.transition)
+          (.delay "2000")
+          (.attr "r" "10"))
       (-> node-content
           (.append "text")
+          (.transition)
+          (.delay "3000")
           (.text (fn [o] (.-word o)))
           (.attr "x" (fn [o] (int (.-x o))))
           (.attr "y" (fn [o] (int (.-y o))))
@@ -69,21 +56,12 @@
           (.data links)
           (.enter)
           (.append "path")
+          (.transition)
+          (.delay "1000")
           (.attr "d" (fn [i] (path-drawer i)))
           (.attr "stroke" "steelblue")
           (.attr "stroke-width" "2")
-          (.attr "fill" "none")
-          ))))
-
-    ;(.transition)
-    ;(.delay "5000")
-    ;(.attr "r" "10")
-
-;     .transition()
-;       .delay(function (d) {return 1000;})
-;       .duration(function (d) {return 2000;})
-;       .ease("linear")
-;       .attr("stroke-dashoffset", 0);
+          (.attr "fill" "none")))))
 
 
 ;; Handle GET request to our external service
@@ -106,17 +84,25 @@
               :keywords? true})))
 
 
+(defn reset-all []
+  (reset! parsed-text "")
+  (reset! start-text "")
+  (-> js/d3 (.select "svg") (.remove)))
+
+
 ;; function to render the page, react/reagent style!
 (defn display-page []
   [:div
    [:h2 "McCawley"]
-   [:p "Type an English sentence and press \"Parse\"."]
    [:input {:type "text"
+            :size 21
+            :placeholder "Type an English sentence."
             :value @start-text
             :on-change #(reset! start-text (-> % .-target .-value))}]
    [:p]
    [:button {:on-click #(retrieve-parsed @start-text)} "Parse"]
-   [:p]
+   " "
+   [:button {:on-click #(reset-all)} "Reset"]
   ])
 
 (defn main []
