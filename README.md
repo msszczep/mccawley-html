@@ -10,3 +10,10 @@ lein repl
 Useful:
 https://lambdahands.github.io/clojure/vizualization/clojurescript/2014/08/10/d3-methods-as-data.html
 
+TODO:
+* Add lines
+* Add animation
+* Add a reset / clear button/mechanism
+* Make nodes rectangles
+* Make nodes "swallow" the words whole
+* Mnake nodes "color coded"

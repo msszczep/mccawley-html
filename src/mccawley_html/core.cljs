@@ -32,32 +32,29 @@
                     (.enter)
                     (.append "g")
                     (.attr "transform" "translate(0,0)"))]
-    (-> content
-        (.append "circle")
-        (.attr "cx" (fn [o] (int (.-x o))))
-        (.attr "cy" (fn [o] (int (.-y o))))
-        (.attr "r" "10")
-        (.attr "fill" "yellow"))
-    (-> content
-        (.append "text")
-        (.text (fn [o] (.-word o)))
-        (.attr "x" (fn [o] (int (.-x o))))
-        (.attr "y" (fn [o] (int (.-y o))))
-        (.attr "fill" "black"))
-    ))
+    (letfn [(make-line [o] (-> js/d3.svg
+                              (.line)
+                              (.x (fn [o] (:x o)))
+                              (.y (fn [o] (:y o)))
+                              (.interpolate "linear")))
+            (pow [n p] (.pow js/Math n p))]
+      (-> content
+          (.append "circle")
+          (.attr "cx" (fn [o] (int (.-x o))))
+          (.attr "cy" (fn [o] (int (.-y o))))
+          (.attr "r" "10")
+          (.attr "fill" "orange"))
+      (-> content
+          (.append "text")
+          (.text (fn [o] (.-word o)))
+          (.attr "x" (fn [o] (int (.-x o))))
+          (.attr "y" (fn [o] (int (.-y o))))
+          (.attr "fill" "black"))
+    )))
 
     ;(.transition)
     ;(.delay "5000")
     ;(.attr "r" "10")
-
-    ;(def line (-> js/d3.svg
-;              (.line)
-;              (.x (fn [o] (.-x o)))
-;              (.y (fn [o] (.-y o)))
-;              (.interpolate "linear")))
-
-;(defn pow [n p]
-;  (.pow js/Math n p))
 
 ;(defn get-euclidean-distance [d]
 ;  (pow (+ (pow (- (.x (first d)) (.x (last d))) 2)
@@ -87,19 +84,20 @@
               :keywords? true})))
 
 
-
 ;; function to render the page, react/reagent style!
 (defn display-page []
-   [:div
-     [:h2 "Parsed-text: " @parsed-text]
-     [:p "start-text has value: " @start-text]
-     [:input {:type "text"
-              :value @start-text
-              :on-change #(reset! start-text (-> % .-target .-value))}]
-     [:p]
-     [:button {:on-click #(retrieve-parsed @start-text)} "Parse"]
-     [:p]
-    ])
+  [:div
+   [:h2 "McCawley"]
+   [:input {:type "text"
+            :value @start-text
+            :on-change #(reset! start-text (-> % .-target .-value))}]
+   [:p]
+   [:button {:on-click #(retrieve-parsed @start-text)} "Parse"]
+   [:p]
+  ])
+
+;   [:h2 "Parsed-text: " @parsed-text]
+;   [:p "start-text has value: " @start-text]
 
 (defn main []
   (reagent/render-component [display-page] (.getElementById js/document "app")))
