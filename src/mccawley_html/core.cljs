@@ -87,7 +87,10 @@
 (defn reset-all []
   (reset! parsed-text "")
   (reset! start-text "")
-  (-> js/d3 (.select "svg") (.remove)))
+  (-> js/d3
+      (.select "svg")
+      (.selectAll "*")
+      (.remove)))
 
 
 ;; function to render the page, react/reagent style!

@@ -15,4 +15,4 @@ TODO:
 * Make nodes "swallow" the words whole
 * Make nodes "color coded"
 * Fix the comma problem.
-* Re-parse after a clear.
+* STATS!!!
