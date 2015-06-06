@@ -12,6 +12,16 @@
 ; The displaying happens here
 (defn display-tree [tree-to-display]
   (let [clj-tree (reader/read-string tree-to-display)
+        pos-color {"DT" "#FF1493" "NN" "#DC143C" "NNS" "#DC143C" "NNP" "#DC143C"
+                   "NP" "#DC143C" "PRP" "#FF0000" "PRP$" "#FF0000" "SQ" "#9370DB"
+                   "IN" "#00FF00" "TO" "#00FF00" "CD" "#FA8072" "CC" "#B8860B"
+                   "WDT" "#9932CC" "SBAR" "#9932CC" "VB" "#1E90FF" "VBD" "#1E90FF"
+                   "VBG" "#1E90FF" "VP" "#1E90FF" "VBN" "#1E90FF" "VBP" "#1E90FF"
+                   "VBZ" "#1E90FF" "MD" "#00CED1"
+                   "RB" "#FFA500" "RBR" "#FFA500" "RBS" "#FFA500" "ADVP" "#FFA500"
+                   "PP" "#00FF00" "S" "#800080" "ROOT" "#800080" "FRAG" "#800080"
+                   "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00" "ADJP" "#FF8C00"
+                   }
         svg (-> js/d3
                 (.select "svg")
                 (.attr "width" "1000")
@@ -34,24 +44,9 @@
                          (.attr "transform" "translate(0,0)"))]
     (letfn [(path-drawer [i]
                          (str "M" (.-x (.-source i)) "," (.-y (.-source i))
-                              "L" (.-x (.-target i)) "," (.-y (.-target i))))]
-      (-> node-content
-          (.append "circle")
-          (.attr "cx" (fn [o] (int (.-x o))))
-          (.attr "cy" (fn [o] (int (.-y o))))
-          (.attr "fill" "orange")
-          (.transition)
-          (.delay (fn [d i] (* i 100)))
-          (.attr "r" "10"))
-      (-> node-content
-          (.append "text")
-          (.transition)
-          (.delay (fn [d i] (* i 100)))
-          (.text (fn [o] (.-word o)))
-          (.attr "x" (fn [o] (int (.-x o))))
-          (.attr "y" (fn [o] (int (.-y o))))
-          (.attr "fill" "black"))
-      (-> svg
+                              "L" (.-x (.-target i)) "," (.-y (.-target i))))
+            (get-pos-color [p] (if (nil? (pos-color p)) "#808080" (pos-color p)))]
+      (-> svg ; lines
           (.selectAll "path")
           (.data links)
           (.enter)
@@ -59,9 +54,45 @@
           (.transition)
           (.delay (fn [d i] (* i 100)))
           (.attr "d" (fn [i] (path-drawer i)))
-          (.attr "stroke" "steelblue")
+          (.attr "stroke" "black")
           (.attr "stroke-width" "2")
-          (.attr "fill" "none")))))
+          (.attr "fill" "none"))
+      (-> node-content ; rectangle for part of speech
+          (.append "rect")
+          (.attr "x" (fn [o] (int (.-x o))))
+          (.attr "y" (fn [o] (int (- (.-y o) 20))))
+          (.attr "height" 20)
+          (.attr "fill" (fn [o] (get-pos-color (.-pos o))))
+          (.transition)
+          (.delay (fn [d i] (* i 100)))
+          (.attr "width" 45))
+      (-> node-content ; rectangle for word
+          (.append "rect")
+          (.attr "x" (fn [o] (int (.-x o))))
+          (.attr "y" (fn [o] (int (.-y o))))
+          (.attr "height" (fn [o] (if (not= (.-word o) "") 20 0)))
+          (.attr "fill" "#FFFFFF")
+          (.transition)
+          (.delay (fn [d i] (* i 100)))
+          (.attr "width" (fn [o] (if (not= (.-word o) "") 45 0))))
+      (-> node-content ; word
+          (.append "text")
+          (.transition)
+          (.delay (fn [d i] (* i 100)))
+          (.text (fn [o] (.-word o)))
+          (.attr "x" (fn [o] (int (.-x o))))
+          (.attr "y" (fn [o] (int (+ (.-y o) 20))))
+          (.attr "fill" "black"))
+      (-> node-content ; part of speech
+          (.append "text")
+          (.transition)
+          (.delay (fn [d i] (* i 100)))
+          (.text (fn [o] (.-pos o)))
+          (.attr "x" (fn [o] (int (.-x o))))
+          (.attr "y" (fn [o] (int (.-y o))))
+          (.attr "fill" "white"))
+
+      )))
 
 
 ;; Handle GET request to our external service
