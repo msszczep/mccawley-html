@@ -35,12 +35,10 @@
                  (.size (clj->js [1000 450])))
         nodes (-> tree
                   (.nodes (clj->js clj-tree)))
-        links (-> tree
-                  (.links nodes)
-                  )
+        links (-> tree (.links nodes))
         node-content (-> svg
                          (.selectAll "g")
-                         (.data nodes)
+                         (.data links)
                          (.enter)
                          (.append "g")
                          (.attr "transform" "translate(0,0)"))]
@@ -60,42 +58,40 @@
           (.attr "stroke-width" "2")
           (.attr "fill" "none"))
       (-> node-content ; rectangle for part of speech
-          (.data nodes)
+          (.data links)
           (.append "rect")
-          (.attr "x" (fn [o] (int (.-x o))))
-          (.attr "y" (fn [o] (int (- (.-y o) 20))))
+          (.attr "x" (fn [o] (int (.-x (.-target o)))))
+          (.attr "y" (fn [o] (int (- (.-y (.-target o)) 20))))
           (.attr "height" 20)
-          (.attr "fill" (fn [o] (get-pos-color (.-pos o))))
+          (.attr "fill" (fn [o] (get-pos-color (.-pos (.-target o)))))
           (.transition)
           (.delay (fn [d i] (* i 100)))
           (.attr "width" 45))
       (-> node-content ; rectangle for word
           (.append "rect")
-          (.attr "x" (fn [o] (int (.-x o))))
-          (.attr "y" (fn [o] (int (.-y o))))
-          (.attr "height" (fn [o] (if (not= (.-word o) "") 20 0)))
+          (.attr "x" (fn [o] (int (.-x (.-target o)))))
+          (.attr "y" (fn [o] (int (.-y (.-target o)))))
+          (.attr "height" (fn [o] (if (not= (.-word (.-target o)) "") 20 0)))
           (.attr "fill" "#FFFFFF")
           (.transition)
           (.delay (fn [d i] (* i 100)))
-          (.attr "width" (fn [o] (if (not= (.-word o) "") 45 0))))
+          (.attr "width" (fn [o] (if (not= (.-word (.-target o)) "") 45 0))))
       (-> node-content ; word
           (.append "text")
           (.transition)
           (.delay (fn [d i] (* i 100)))
-          (.text (fn [o] (.-word o)))
-          (.attr "x" (fn [o] (int (.-x o))))
-          (.attr "y" (fn [o] (int (+ (.-y o) 20))))
+          (.text (fn [o] (.-word (.-target o))))
+          (.attr "x" (fn [o] (int (.-x (.-target o)))))
+          (.attr "y" (fn [o] (int (+ (.-y (.-target o)) 20))))
           (.attr "fill" "black"))
       (-> node-content ; part of speech
           (.append "text")
           (.transition)
           (.delay (fn [d i] (* i 100)))
-          (.text (fn [o] (.-pos o)))
-          (.attr "x" (fn [o] (int (.-x o))))
-          (.attr "y" (fn [o] (int (.-y o))))
-          (.attr "fill" "white"))
-
-      )))
+          (.text (fn [o] (.-pos (.-target o))))
+          (.attr "x" (fn [o] (int (.-x (.-target o)))))
+          (.attr "y" (fn [o] (int (.-y (.-target o)))))
+          (.attr "fill" "white")))))
 
 
 ;; Handle GET request to our external service
@@ -111,7 +107,8 @@
 
 ;; function to call when we click on parse button
 (defn retrieve-parsed [param]
-  (let [uri (str "http://localhost:3000/parse/" param)]
+  (let [url-encoded-param (clojure.string/replace param #"," "%2C")
+        uri (str "http://localhost:3000/parse/" url-encoded-param)]
     (GET uri {:handler handler
               :error-handler error-handler
               :response-format :json

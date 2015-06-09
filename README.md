@@ -18,9 +18,7 @@ List of CSS color names
 http://www.w3schools.com/cssref/css_colornames.asp
 
 TODO:
-* Put lines underneath
 * Make nodes "swallow" the words whole
-* Fix the comma problem.
 * STATS!!!
 
 --
@@ -32,7 +30,5 @@ TODO:
 23.	RP	Particle
 24.	SYM	Symbol
 26.	UH	Interjection
-33.	WDT	Wh-determiner
-34.	WP	Wh-pronoun
 35.	WP$	Possessive wh-pronoun
 36.	WRB	Wh-adverb
