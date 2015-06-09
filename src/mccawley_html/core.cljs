@@ -17,7 +17,8 @@
                    "IN" "#00FF00" "TO" "#00FF00" "CD" "#FA8072" "CC" "#B8860B"
                    "WDT" "#9932CC" "SBAR" "#9932CC" "VB" "#1E90FF" "VBD" "#1E90FF"
                    "VBG" "#1E90FF" "VP" "#1E90FF" "VBN" "#1E90FF" "VBP" "#1E90FF"
-                   "VBZ" "#1E90FF" "MD" "#00CED1"
+                   "VBZ" "#1E90FF" "MD" "#00CED1" "QP" "#FA8072" "WHNP" "#9932CC"
+                   "WP" "#9932CC"
                    "RB" "#FFA500" "RBR" "#FFA500" "RBS" "#FFA500" "ADVP" "#FFA500"
                    "PP" "#00FF00" "S" "#800080" "ROOT" "#800080" "FRAG" "#800080"
                    "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00" "ADJP" "#FF8C00"
@@ -31,11 +32,12 @@
         tree (-> js/d3
                  (.-layout)
                  (.tree)
-                 (.size (clj->js [1000 400])))
+                 (.size (clj->js [1000 450])))
         nodes (-> tree
                   (.nodes (clj->js clj-tree)))
         links (-> tree
-                  (.links nodes))
+                  (.links nodes)
+                  )
         node-content (-> svg
                          (.selectAll "g")
                          (.data nodes)
@@ -45,11 +47,11 @@
     (letfn [(path-drawer [i]
                          (str "M" (.-x (.-source i)) "," (.-y (.-source i))
                               "L" (.-x (.-target i)) "," (.-y (.-target i))))
-            (get-pos-color [p] (if (nil? (pos-color p)) "#808080" (pos-color p)))]
+            (get-pos-color [p] (if (nil? (pos-color p))
+                                 "#808080" (pos-color p)))]
       (-> svg ; lines
-          (.selectAll "path")
+          (.selectAll "g")
           (.data links)
-          (.enter)
           (.append "path")
           (.transition)
           (.delay (fn [d i] (* i 100)))
@@ -58,6 +60,7 @@
           (.attr "stroke-width" "2")
           (.attr "fill" "none"))
       (-> node-content ; rectangle for part of speech
+          (.data nodes)
           (.append "rect")
           (.attr "x" (fn [o] (int (.-x o))))
           (.attr "y" (fn [o] (int (- (.-y o) 20))))
