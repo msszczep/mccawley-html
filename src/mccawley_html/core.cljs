@@ -18,11 +18,12 @@
                    "WDT" "#9932CC" "SBAR" "#9932CC" "VB" "#1E90FF" "VBD" "#1E90FF"
                    "VBG" "#1E90FF" "VP" "#1E90FF" "VBN" "#1E90FF" "VBP" "#1E90FF"
                    "VBZ" "#1E90FF" "MD" "#00CED1" "QP" "#FA8072" "WHNP" "#9932CC"
-                   "WP" "#9932CC"
+                   "WP" "#9932CC" "EX" "#191970" "POS" "#800000" "UH" "#EE82EE"
                    "RB" "#FFA500" "RBR" "#FFA500" "RBS" "#FFA500" "ADVP" "#FFA500"
                    "PP" "#00FF00" "S" "#800080" "ROOT" "#800080" "FRAG" "#800080"
+                   "WRB" "#FF00FF" "WHADVP" "#FF00FF" "PDT" "#FF1493" "SBARQ" "#800080"
                    "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00" "ADJP" "#FF8C00"
-                   }
+                   "PRT" "#000080" "RP" "#000080" "SINV" "#800080"}
         svg (-> js/d3
                 (.select "svg")
                 (.attr "width" "1000")
@@ -32,27 +33,31 @@
         tree (-> js/d3
                  (.-layout)
                  (.tree)
-                 (.size (clj->js [1000 450])))
-        nodes (-> tree
-                  (.nodes (clj->js clj-tree)))
-        links (-> tree (.links nodes))
+                 (.size (clj->js [1000 470])))
+        links (-> tree
+                  (.links (-> tree
+                              (.nodes (clj->js clj-tree)))))
         node-content (-> svg
                          (.selectAll "g")
                          (.data links)
                          (.enter)
                          (.append "g")
-                         (.attr "transform" "translate(0,0)"))]
+                         (.attr "transform" "translate(0,0)"))
+        delay-in-ms 100]
     (letfn [(path-drawer [i]
-                         (str "M" (.-x (.-source i)) "," (.-y (.-source i))
+                         (str "M" (.-x (.-source i)) "," (+ (.-y (.-source i)) 4)
                               "L" (.-x (.-target i)) "," (.-y (.-target i))))
             (get-pos-color [p] (if (nil? (pos-color p))
-                                 "#808080" (pos-color p)))]
+                                 "#808080" (pos-color p)))
+            (get-node-length [n]
+                             (* 10 (apply max [(count (.-word n))
+                                               (count (.-pos n))])))]
       (-> svg ; lines
           (.selectAll "g")
           (.data links)
           (.append "path")
           (.transition)
-          (.delay (fn [d i] (* i 100)))
+          (.delay (fn [d i] (* i delay-in-ms)))
           (.attr "d" (fn [i] (path-drawer i)))
           (.attr "stroke" "black")
           (.attr "stroke-width" "2")
@@ -60,36 +65,41 @@
       (-> node-content ; rectangle for part of speech
           (.data links)
           (.append "rect")
-          (.attr "x" (fn [o] (int (.-x (.-target o)))))
-          (.attr "y" (fn [o] (int (- (.-y (.-target o)) 20))))
-          (.attr "height" 20)
+          (.attr "x" (fn [o] (int (- (.-x (.-target o))
+                                     (/ (get-node-length (.-target o)) 2)))))
+          (.attr "y" (fn [o] (int (- (.-y (.-target o)) 10))))
+          (.attr "height" 14)
           (.attr "fill" (fn [o] (get-pos-color (.-pos (.-target o)))))
           (.transition)
-          (.delay (fn [d i] (* i 100)))
-          (.attr "width" 45))
+          (.delay (fn [d i] (* i delay-in-ms)))
+          (.attr "width" (fn [o] (get-node-length (.-target o)))))
       (-> node-content ; rectangle for word
           (.append "rect")
-          (.attr "x" (fn [o] (int (.-x (.-target o)))))
+          (.attr "x" (fn [o] (int (- (.-x (.-target o))
+                                     (/ (get-node-length (.-target o)) 2)))))
           (.attr "y" (fn [o] (int (.-y (.-target o)))))
-          (.attr "height" (fn [o] (if (not= (.-word (.-target o)) "") 20 0)))
+          (.attr "height" (fn [o] (if (not= (.-word (.-target o)) "") 14 0)))
           (.attr "fill" "#FFFFFF")
           (.transition)
-          (.delay (fn [d i] (* i 100)))
-          (.attr "width" (fn [o] (if (not= (.-word (.-target o)) "") 45 0))))
+          (.delay (fn [d i] (* i delay-in-ms)))
+          (.attr "width" (fn [o] (if (not= (.-word (.-target o)) "")
+                                   (get-node-length (.-target o)) 0))))
       (-> node-content ; word
           (.append "text")
           (.transition)
-          (.delay (fn [d i] (* i 100)))
+          (.delay (fn [d i] (* i delay-in-ms)))
           (.text (fn [o] (.-word (.-target o))))
-          (.attr "x" (fn [o] (int (.-x (.-target o)))))
-          (.attr "y" (fn [o] (int (+ (.-y (.-target o)) 20))))
+          (.attr "x" (fn [o] (int (- (.-x (.-target o))
+                                     (/ (get-node-length (.-target o)) 2)))))
+          (.attr "y" (fn [o] (int (+ (.-y (.-target o)) 10))))
           (.attr "fill" "black"))
       (-> node-content ; part of speech
           (.append "text")
           (.transition)
-          (.delay (fn [d i] (* i 100)))
+          (.delay (fn [d i] (* i delay-in-ms)))
           (.text (fn [o] (.-pos (.-target o))))
-          (.attr "x" (fn [o] (int (.-x (.-target o)))))
+          (.attr "x" (fn [o] (+ 3 (int (- (.-x (.-target o))
+                                     (/ (get-node-length (.-target o)) 2))))))
           (.attr "y" (fn [o] (int (.-y (.-target o)))))
           (.attr "fill" "white")))))
 

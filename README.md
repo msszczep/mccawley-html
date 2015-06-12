@@ -18,17 +18,10 @@ List of CSS color names
 http://www.w3schools.com/cssref/css_colornames.asp
 
 TODO:
-* Make nodes "swallow" the words whole
 * STATS!!!
 
 --
-4.	EX	Existential there
 5.	FW	Foreign word
 10.	LS	List item marker
-16.	PDT	Predeterminer
-17.	POS	Possessive ending
-23.	RP	Particle
 24.	SYM	Symbol
-26.	UH	Interjection
 35.	WP$	Possessive wh-pronoun
-36.	WRB	Wh-adverb
