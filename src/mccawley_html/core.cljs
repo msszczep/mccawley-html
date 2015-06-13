@@ -5,9 +5,10 @@
 
 (enable-console-print!)
 
-;; Define 2 reagent atoms we need for state
+;; Define reagent atoms we need for state
 (def parsed-text (reagent/atom ""))
 (def start-text (reagent/atom ""))
+(def stats-html (reagent/atom ""))
 
 ; The displaying happens here
 (defn display-tree [tree-to-display]
@@ -103,12 +104,30 @@
           (.attr "y" (fn [o] (int (.-y (.-target o)))))
           (.attr "fill" "white")))))
 
+(defn compute-tree-stats [tree]
+  (let [tree-nodes (->> (tree-seq #(or (map? %) (vector? %))
+                                  identity
+                                  (reader/read-string tree))
+                        (filter #(and (map? %) (:pos %)))
+                        (map :pos)
+                        rest)
+        top-five (->> tree-nodes
+                      frequencies
+                      (sort-by val)
+                      reverse
+                      (take 5))]
+    [:b "STATS"
+     [:p (str "Number of nodes: " (count tree-nodes))]
+     [:p (str "Maximum depth: ")]
+     [:p (str "Most frequent nodes:")]
+      (map #(vector :p (str (first %) " " (last %))) top-five)]))
 
 ;; Handle GET request to our external service
 (defn handler [response]
   (do
     (reset! parsed-text (:parsed-text response))
     (display-tree @parsed-text)
+    (reset! stats-html (compute-tree-stats @parsed-text))
     (.log js/console (:parsed-text response))))
 
 (defn error-handler [{:keys [status status-text]}]
@@ -128,6 +147,7 @@
 (defn reset-all []
   (reset! parsed-text "")
   (reset! start-text "")
+  (reset! stats-html "")
   (-> js/d3
       (.select "svg")
       (.selectAll "*")
@@ -147,6 +167,7 @@
    [:button {:on-click #(retrieve-parsed @start-text)} "Parse"]
    " "
    [:button {:on-click #(reset-all)} "Reset"]
+   [:p @stats-html]
   ])
 
 (defn main []

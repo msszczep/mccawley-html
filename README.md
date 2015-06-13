@@ -18,7 +18,7 @@ List of CSS color names
 http://www.w3schools.com/cssref/css_colornames.asp
 
 TODO:
-* STATS!!!
+* Stats - Display depth of the tree
 
 --
 5.	FW	Foreign word
