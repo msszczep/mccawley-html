@@ -104,23 +104,33 @@
           (.attr "y" (fn [o] (int (.-y (.-target o)))))
           (.attr "fill" "white")))))
 
+
 (defn compute-tree-stats [tree]
-  (let [tree-nodes (->> (tree-seq #(or (map? %) (vector? %))
-                                  identity
-                                  (reader/read-string tree))
-                        (filter #(and (map? %) (:pos %)))
-                        (map :pos)
-                        rest)
-        top-five (->> tree-nodes
-                      frequencies
-                      (sort-by val)
-                      reverse
-                      (take 5))]
+  (letfn [(get-tree-seq [node-type]
+                        (->> (tree-seq #(or (map? %) (vector? %))
+                                       identity
+                                       (reader/read-string tree))
+                             (filter #(and (map? %) (node-type %)))
+                             (map node-type)))]
+    (let [tree-nodes (rest (get-tree-seq :pos))
+          num-of-words (->> (get-tree-seq :word)
+                            (remove empty?)
+                            count)
+          max-depth (->> (get-tree-seq :children)
+                         (map count)
+                         (apply max)) ; value isn't always right
+          top-five (->> tree-nodes
+                        frequencies
+                        (sort-by val)
+                        reverse
+                        (take 5))]
     [:b "STATS"
      [:p (str "Number of nodes: " (count tree-nodes))]
-     [:p (str "Maximum depth: ")]
+     [:p (str "Number of words: " num-of-words)]
+     [:p (str "Maximum depth: " max-depth)]
      [:p (str "Most frequent nodes:")]
-      (map #(vector :p (str (first %) " " (last %))) top-five)]))
+      (map #(vector :p (str (first %) " " (last %))) top-five)])))
+
 
 ;; Handle GET request to our external service
 (defn handler [response]
@@ -167,6 +177,7 @@
    [:button {:on-click #(retrieve-parsed @start-text)} "Parse"]
    " "
    [:button {:on-click #(reset-all)} "Reset"]
+   [:p]
    [:p @stats-html]
   ])
 

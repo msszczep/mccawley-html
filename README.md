@@ -17,8 +17,8 @@ https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
 List of CSS color names
 http://www.w3schools.com/cssref/css_colornames.asp
 
-TODO:
-* Stats - Display depth of the tree
+Javascript function to calculate depth of a tree
+Math.max.apply(Math, links.map(function (i) {return i.target.depth;}))
 
 --
 5.	FW	Foreign word
