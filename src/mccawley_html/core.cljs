@@ -116,9 +116,18 @@
           num-of-words (->> (get-tree-seq :word)
                             (remove empty?)
                             count)
-          max-depth (->> (get-tree-seq :children)
-                         (map count)
-                         (apply max)) ; value isn't always right
+          max-depth (->> (loop [input-seq (map #(if (= % "[") 1 -1)
+                                               (re-seq #"[\[\]]" tree))
+                                output-seq [0]]
+                           (if (empty? input-seq)
+                             output-seq
+                             (recur (rest input-seq)
+                                    (conj output-seq
+                                          (+ (last output-seq)
+                                             (first input-seq))))))
+                         (apply max)
+                         dec
+                         dec)
           top-five (->> tree-nodes
                         frequencies
                         (sort-by val)
