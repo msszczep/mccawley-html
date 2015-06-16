@@ -115,8 +115,8 @@
                              (map node-type)))]
     (let [tree-nodes (rest (get-tree-seq :pos))
           num-of-parsed-words (->> (get-tree-seq :word)
-                            (remove empty?)
-                            count)
+                                   (remove empty?)
+                                   count)
           max-depth (->> (loop [input-seq (map #(if (= % "[") 1 -1)
                                                (re-seq #"[\[\]]" tree))
                                 output-seq [0]]
@@ -136,7 +136,8 @@
                         (take 5))]
     [:b "STATS"
      [:p (str "Number of nodes: " (count tree-nodes))]
-     [:p (str "Number of words: " (count (clojure.string/split @start-text #"\s+")))]
+     [:p (str "Number of words: " (count (clojure.string/split @start-text
+                                                               #"\s+")))]
      [:p (str "Number of parsed words: " num-of-parsed-words)]
      [:p (str "Maximum depth: " max-depth)]
      [:p (str "Most frequent nodes:")]
@@ -174,6 +175,10 @@
       (.selectAll "*")
       (.remove)))
 
+;(defn get-random-sentence []
+;  (-> (slurp "/Users/msszczep1/Desktop/mitchells/workspace/mccawley-html/test/test_sentences.txt")
+;      clojure.string/split-lines
+;      rand-nth))
 
 ;; function to render the page, react/reagent style!
 (defn display-page []
@@ -189,7 +194,7 @@
    " "
    [:button {:on-click #(reset-all)} "Reset"]
    " "
-   [:button "Random"]
+;   [:button {:on-click #(reset! start-text (get-random-sentence))} "Random"]
    [:p]
    [:p @stats-html]
   ])
