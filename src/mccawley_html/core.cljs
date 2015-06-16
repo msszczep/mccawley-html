@@ -24,7 +24,8 @@
                    "PP" "#00FF00" "S" "#800080" "ROOT" "#800080" "FRAG" "#800080"
                    "WRB" "#FF00FF" "WHADVP" "#FF00FF" "PDT" "#FF1493" "SBARQ" "#800080"
                    "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00" "ADJP" "#FF8C00"
-                   "PRT" "#000080" "RP" "#000080" "SINV" "#800080"}
+                   "PRT" "#000080" "RP" "#000080" "SINV" "#800080" "FW" "#000000"
+                   "LS" "#8B4513" "SYM" "#2E8B57" "WP$" "#9932CC"}
         svg (-> js/d3
                 (.select "svg")
                 (.attr "width" "1000")
@@ -190,5 +191,9 @@
    [:p @stats-html]
   ])
 
+(defn display-top []
+  [:p @start-text])
+
 (defn main []
-  (reagent/render-component [display-page] (.getElementById js/document "app")))
+  (reagent/render-component [display-page] (.getElementById js/document "app"))
+  (reagent/render-component [display-top] (.getElementById js/document "canvastop")))

@@ -18,12 +18,9 @@ List of CSS color names
 http://www.w3schools.com/cssref/css_colornames.asp
 
 TODO:
-* Add the PennTags below.
-* Add a top field showing the full text of the tree.
-* Prettify the stats
-
---
-5.	FW	Foreign word
-10.	LS	List item marker
-24.	SYM	Symbol
-35.	WP$	Possessive wh-pronoun
+1 Prettify the stats
+2 Add "Random sentence" button
+3 Add Twitter Bootstrap
+4 Put narrative comments in code
+5 Pad nodes in tree
+6 Handle borders/margins for adjacent nodes
