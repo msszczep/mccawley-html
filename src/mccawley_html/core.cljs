@@ -52,8 +52,8 @@
             (get-pos-color [p] (if (nil? (pos-color p))
                                  "#808080" (pos-color p)))
             (get-node-length [n]
-                             (* 10 (apply max [(count (.-word n))
-                                               (count (.-pos n))])))]
+                             (* 10 (apply max [(count (.-word (.-target n)))
+                                               (count (.-pos (.-target n)))])))]
       (-> svg ; lines
           (.selectAll "g")
           (.data links)
@@ -68,31 +68,31 @@
           (.data links)
           (.append "rect")
           (.attr "x" (fn [o] (int (- (.-x (.-target o))
-                                     (/ (get-node-length (.-target o)) 2)))))
+                                     (/ (get-node-length o) 2)))))
           (.attr "y" (fn [o] (int (- (.-y (.-target o)) 10))))
           (.attr "height" 14)
           (.attr "fill" (fn [o] (get-pos-color (.-pos (.-target o)))))
           (.transition)
           (.delay (fn [d i] (* i delay-in-ms)))
-          (.attr "width" (fn [o] (get-node-length (.-target o)))))
+          (.attr "width" (fn [o] (get-node-length o))))
       (-> node-content ; rectangle for word
           (.append "rect")
           (.attr "x" (fn [o] (int (- (.-x (.-target o))
-                                     (/ (get-node-length (.-target o)) 2)))))
+                                     (/ (get-node-length o) 2)))))
           (.attr "y" (fn [o] (int (.-y (.-target o)))))
           (.attr "height" (fn [o] (if (not= (.-word (.-target o)) "") 14 0)))
           (.attr "fill" "#FFFFFF")
           (.transition)
           (.delay (fn [d i] (* i delay-in-ms)))
           (.attr "width" (fn [o] (if (not= (.-word (.-target o)) "")
-                                   (get-node-length (.-target o)) 0))))
+                                   (get-node-length o) 0))))
       (-> node-content ; word
           (.append "text")
           (.transition)
           (.delay (fn [d i] (* i delay-in-ms)))
           (.text (fn [o] (.-word (.-target o))))
           (.attr "x" (fn [o] (int (- (.-x (.-target o))
-                                     (/ (get-node-length (.-target o)) 2)))))
+                                     (/ (get-node-length o) 2)))))
           (.attr "y" (fn [o] (int (+ (.-y (.-target o)) 10))))
           (.attr "fill" "black"))
       (-> node-content ; part of speech
@@ -101,7 +101,7 @@
           (.delay (fn [d i] (* i delay-in-ms)))
           (.text (fn [o] (.-pos (.-target o))))
           (.attr "x" (fn [o] (+ 3 (int (- (.-x (.-target o))
-                                     (/ (get-node-length (.-target o)) 2))))))
+                                     (/ (get-node-length o) 2))))))
           (.attr "y" (fn [o] (int (.-y (.-target o)))))
           (.attr "fill" "white")))))
 
@@ -114,7 +114,7 @@
                              (filter #(and (map? %) (node-type %)))
                              (map node-type)))]
     (let [tree-nodes (rest (get-tree-seq :pos))
-          num-of-words (->> (get-tree-seq :word)
+          num-of-parsed-words (->> (get-tree-seq :word)
                             (remove empty?)
                             count)
           max-depth (->> (loop [input-seq (map #(if (= % "[") 1 -1)
@@ -136,7 +136,8 @@
                         (take 5))]
     [:b "STATS"
      [:p (str "Number of nodes: " (count tree-nodes))]
-     [:p (str "Number of words: " num-of-words)]
+     [:p (str "Number of words: " (count (clojure.string/split @start-text #"\s+")))]
+     [:p (str "Number of parsed words: " num-of-parsed-words)]
      [:p (str "Maximum depth: " max-depth)]
      [:p (str "Most frequent nodes:")]
       (map #(vector :p (str (first %) " " (last %))) top-five)])))
@@ -179,7 +180,7 @@
   [:div
    [:h2 "McCawley"]
    [:input {:type "text"
-            :size 21
+            :size 23
             :placeholder "Type an English sentence."
             :value @start-text
             :on-change #(reset! start-text (-> % .-target .-value))}]
@@ -187,6 +188,8 @@
    [:button {:on-click #(retrieve-parsed @start-text)} "Parse"]
    " "
    [:button {:on-click #(reset-all)} "Reset"]
+   " "
+   [:button "Random"]
    [:p]
    [:p @stats-html]
   ])

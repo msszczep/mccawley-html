@@ -19,8 +19,9 @@ http://www.w3schools.com/cssref/css_colornames.asp
 
 TODO:
 1 Prettify the stats
-2 Add "Random sentence" button
+2 Get "Random sentence" button to work
 3 Add Twitter Bootstrap
 4 Put narrative comments in code
 5 Pad nodes in tree
 6 Handle borders/margins for adjacent nodes
+7 Implement delay of stats
