@@ -10,7 +10,7 @@
 (def start-text (reagent/atom ""))
 (def stats-html (reagent/atom ""))
 
-; The displaying happens here
+;; The displaying happens here
 (defn display-tree [tree-to-display]
   (let [clj-tree (reader/read-string tree-to-display)
         pos-color {"DT" "#FF1493" "NN" "#DC143C" "NNS" "#DC143C" "NNP" "#DC143C"
@@ -106,17 +106,37 @@
           (.attr "fill" "white")))))
 
 
+;; compute and display stats
 (defn compute-tree-stats [tree]
   (letfn [(get-tree-seq [node-type]
+           ;; function to get a sequence of all the nodes of a given type
                         (->> (tree-seq #(or (map? %) (vector? %))
                                        identity
                                        (reader/read-string tree))
                              (filter #(and (map? %) (node-type %)))
                              (map node-type)))]
+
     (let [tree-nodes (rest (get-tree-seq :pos))
+          ;; using rest is necessary since we don't consider ROOT
+
           num-of-parsed-words (->> (get-tree-seq :word)
                                    (remove empty?)
                                    count)
+
+          ;; Idea to calculate depth: Take the sequence of the angled brackets
+          ;; in a parsed tree; the sequence reflects the tree's gross
+          ;; structure.  Replace each left-bracket with 1, replace each
+          ;; right-bracket with -1, make an additive sequence of the resulting
+          ;; values, find the maximum result of that sequence (the tree's
+          ;; depth) and subtract two to account for the ROOT and S nodes which
+          ;; we don't count in the displayed tree.
+          ;;
+          ;; For example, a tree with the gross structure: [[[][[[]]]]]
+          ;; gets transformed into the sequence  (1 1 1 -1 1 1 1 -1 -1 -1 -1 -1)
+          ;; which becomes the additive sequence (1 2 3  2 3 4 5  4  3  2  1  0)
+          ;; whose maximum value is 5, and whose depth for our purposes is
+          ;; 5 - 2 = 3.
+
           max-depth (->> (loop [input-seq (map #(if (= % "[") 1 -1)
                                                (re-seq #"[\[\]]" tree))
                                 output-seq [0]]
@@ -175,10 +195,19 @@
       (.selectAll "*")
       (.remove)))
 
-;(defn get-random-sentence []
-;  (-> (slurp "/Users/msszczep1/Desktop/mitchells/workspace/mccawley-html/test/test_sentences.txt")
-;      clojure.string/split-lines
-;      rand-nth))
+(defn get-random-sentence []
+  (let [s ["A rare black squirrel has become a regular visitor to a suburban garden."
+           "Jesus wept."
+           "Jesus ate nine pizzas."
+           "The bush burned with fire, and the bush was not consumed."
+           "Man is born free, and everywhere he is in chains."
+           "Energy equals mass times the speed of light squared."
+           "The freethinking of one age is the common sense of the next."
+           "Life is a moderately good play with a badly written third act."
+           "How much wood would a woodchuck chuck if a woodchuck would chuck wood?"
+           "The sky above the port was the color of television, tuned to a dead channel."
+           ]]
+      (rand-nth s)))
 
 ;; function to render the page, react/reagent style!
 (defn display-page []
@@ -194,7 +223,7 @@
    " "
    [:button {:on-click #(reset-all)} "Reset"]
    " "
-;   [:button {:on-click #(reset! start-text (get-random-sentence))} "Random"]
+   [:button {:on-click #(reset! start-text (get-random-sentence))} "Random"]
    [:p]
    [:p @stats-html]
   ])
