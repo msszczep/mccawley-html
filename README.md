@@ -19,7 +19,6 @@ http://www.w3schools.com/cssref/css_colornames.asp
 
 TODO:
 1 Prettify the stats
-2 Add Twitter Bootstrap
-3 Pad nodes in tree
-4 Handle borders/margins for adjacent nodes
-5 Implement delay of stats
+2 Pad nodes in tree
+3 Handle borders/margins for adjacent nodes
+4 Implement delay of stats

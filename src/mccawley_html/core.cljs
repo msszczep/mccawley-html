@@ -154,14 +154,16 @@
                         (sort-by val)
                         reverse
                         (take 5))]
-    [:b "STATS"
-     [:p (str "Number of nodes: " (count tree-nodes))]
-     [:p (str "Number of words: " (count (clojure.string/split @start-text
-                                                               #"\s+")))]
-     [:p (str "Number of parsed words: " num-of-parsed-words)]
-     [:p (str "Maximum depth: " max-depth)]
-     [:p (str "Most frequent nodes:")]
-      (map #(vector :p (str (first %) " " (last %))) top-five)])))
+    [:table {:class "table table-striped"}
+       [:tr [:td "# Nodes: "] [:td (count tree-nodes)]]
+       [:tr [:td "# Words: "] [:td (count (clojure.string/split
+                                                   @start-text
+                                                   #"\s+"))]]
+       [:tr [:td "# Parsed words: "] [:td num-of-parsed-words]]
+       [:tr [:td "Max depth: "] [:td (str max-depth)]]
+       [:tr [:td {:span 2} "Most frequent nodes:"]]
+       ;(map #([:tr [:td (first %)] [:td (last %)]]) top-five)
+      ])))
 
 
 ;; Handle GET request to our external service
@@ -206,24 +208,28 @@
            "Life is a moderately good play with a badly written third act."
            "How much wood would a woodchuck chuck if a woodchuck would chuck wood?"
            "The sky above the port was the color of television, tuned to a dead channel."
+           "Colorless green ideas sleep furiously."
            ]]
       (rand-nth s)))
 
 ;; function to render the page, react/reagent style!
 (defn display-page []
   [:div
-   [:h2 "McCawley"]
+   [:h3 "McCawley"]
    [:input {:type "text"
             :size 23
             :placeholder "Type an English sentence."
             :value @start-text
             :on-change #(reset! start-text (-> % .-target .-value))}]
    [:p]
-   [:button {:on-click #(retrieve-parsed @start-text)} "Parse"]
+   [:button {:on-click #(retrieve-parsed @start-text)
+             :class "btn btn-xs btn-primary"} "Parse"]
    " "
-   [:button {:on-click #(reset-all)} "Reset"]
+   [:button {:on-click #(reset-all)
+             :class "btn btn-xs btn-danger"} "Reset"]
    " "
-   [:button {:on-click #(reset! start-text (get-random-sentence))} "Random"]
+   [:button {:on-click #(reset! start-text (get-random-sentence))
+             :class "btn btn-xs btn-success"} "Random"]
    [:p]
    [:p @stats-html]
   ])
