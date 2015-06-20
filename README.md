@@ -18,7 +18,6 @@ List of CSS color names
 http://www.w3schools.com/cssref/css_colornames.asp
 
 TODO:
-1 Prettify the stats
-2 Pad nodes in tree
-3 Handle borders/margins for adjacent nodes
-4 Implement delay of stats
+1 Pad nodes in tree
+2 Handle borders/margins for adjacent nodes
+3 Implement delay of stats

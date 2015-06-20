@@ -161,9 +161,8 @@
                                                    #"\s+"))]]
        [:tr [:td "# Parsed words: "] [:td num-of-parsed-words]]
        [:tr [:td "Max depth: "] [:td (str max-depth)]]
-       [:tr [:td {:span 2} "Most frequent nodes:"]]
-       ;(map #([:tr [:td (first %)] [:td (last %)]]) top-five)
-      ])))
+       [:tr [:td "Most frequent nodes:"] [:td " "]]
+       (map (fn [x] [:tr [:td (first x)] [:td (last x)]]) top-five)])))
 
 
 ;; Handle GET request to our external service
@@ -209,6 +208,7 @@
            "How much wood would a woodchuck chuck if a woodchuck would chuck wood?"
            "The sky above the port was the color of television, tuned to a dead channel."
            "Colorless green ideas sleep furiously."
+           "The thought of roasted buttery toffees reminds me of Christmas."
            ]]
       (rand-nth s)))
 
