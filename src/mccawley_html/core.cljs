@@ -197,8 +197,9 @@
       (.remove)))
 
 (defn get-random-sentence []
-  (let [s ["A rare black squirrel has become a regular visitor to a suburban garden."
+  (rand-nth ["A rare black squirrel has become a regular visitor to a suburban garden."
            "Jesus wept."
+           "Hulk smash!"
            "Jesus ate nine pizzas."
            "The bush burned with fire, and the bush was not consumed."
            "Man is born free, and everywhere he is in chains."
@@ -207,10 +208,12 @@
            "Life is a moderately good play with a badly written third act."
            "How much wood would a woodchuck chuck if a woodchuck would chuck wood?"
            "The sky above the port was the color of television, tuned to a dead channel."
+           "All the world's a stage, And all the men and women merely players."
            "Colorless green ideas sleep furiously."
            "The thought of roasted buttery toffees reminds me of Christmas."
-           ]]
-      (rand-nth s)))
+           "Nowadays people know the price of everything and the value of nothing."
+           "Life appears to me too short to be spent in nursing animosity or registering wrongs."
+           ]))
 
 ;; function to render the page, react/reagent style!
 (defn display-page []
