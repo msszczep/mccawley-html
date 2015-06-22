@@ -15,17 +15,27 @@
   (let [clj-tree (reader/read-string tree-to-display)
         pos-color {"DT" "#FF1493" "NN" "#DC143C" "NNS" "#DC143C" "NNP" "#DC143C"
                    "NP" "#DC143C" "PRP" "#FF0000" "PRP$" "#FF0000" "SQ" "#9370DB"
-                   "IN" "#00FF00" "TO" "#00FF00" "CD" "#FA8072" "CC" "#B8860B"
+                   "IN" "#5CB85C" "TO" "#5CB85C" "CD" "#FA8072" "CC" "#B8860B"
                    "WDT" "#9932CC" "SBAR" "#9932CC" "VB" "#1E90FF" "VBD" "#1E90FF"
                    "VBG" "#1E90FF" "VP" "#1E90FF" "VBN" "#1E90FF" "VBP" "#1E90FF"
                    "VBZ" "#1E90FF" "MD" "#00CED1" "QP" "#FA8072" "WHNP" "#9932CC"
                    "WP" "#9932CC" "EX" "#191970" "POS" "#800000" "UH" "#EE82EE"
                    "RB" "#FFA500" "RBR" "#FFA500" "RBS" "#FFA500" "ADVP" "#FFA500"
-                   "PP" "#00FF00" "S" "#800080" "ROOT" "#800080" "FRAG" "#800080"
+                   "PP" "#5CB85C" "S" "#800080" "ROOT" "#800080" "FRAG" "#800080"
                    "WRB" "#FF00FF" "WHADVP" "#FF00FF" "PDT" "#FF1493" "SBARQ" "#800080"
                    "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00" "ADJP" "#FF8C00"
                    "PRT" "#000080" "RP" "#000080" "SINV" "#800080" "FW" "#000000"
                    "LS" "#8B4513" "SYM" "#2E8B57" "WP$" "#9932CC"}
+        char-width {\. 4, \a 8, \b 8, \c 8, \d 8, \e 8, \f 4,
+                    \g 8, \h 8, \i 4, \j 4, \k 8, \l 4,
+                    \m 8, \n 8, \o 8, \p 8, \r 8, \s 8, \t 4,
+                    \u 8, \v 8, \w 8, \x 8, \y 8, \z 8, \0 10, \1 10,
+                    \2 10, \3 10, \4 10, \5 10, \6 10, \7 10, \8 10,
+                    \9 10, \A 10, \B 10, \C 10, \D 10, \E 10, \F 10,
+                    \G 10, \H 10, \I 5, \J 10, \K 10, \L 10, \M 10,
+                    \N 10, \O 10, \P 10, \R 10, \S 10, \T 10, \U 10, \V 10
+                    \W 10, \X 10, \Y 10, \Z 10, \( 10, \) 10, \- 10,
+                    \– 10, \— 10, \, 4}
         svg (-> js/d3
                 (.select "svg")
                 (.attr "width" "1000")
@@ -51,9 +61,13 @@
                               "L" (.-x (.-target i)) "," (.-y (.-target i))))
             (get-pos-color [p] (if (nil? (pos-color p))
                                  "#808080" (pos-color p)))
+            (get-word-length [w] (->> (map char w)
+                                      (map #(char-width %))
+                                      (remove nil?)
+                                      (reduce +)))
             (get-node-length [n]
-                             (* 10 (apply max [(count (.-word (.-target n)))
-                                               (count (.-pos (.-target n)))])))]
+                             (max (get-word-length (.-word (.-target n)))
+                                  (get-word-length (.-pos (.-target n)))))]
       (-> svg ; lines
           (.selectAll "g")
           (.data links)
@@ -79,21 +93,23 @@
           (.append "rect")
           (.attr "x" (fn [o] (int (- (.-x (.-target o))
                                      (/ (get-node-length o) 2)))))
-          (.attr "y" (fn [o] (int (.-y (.-target o)))))
-          (.attr "height" (fn [o] (if (not= (.-word (.-target o)) "") 14 0)))
+          (.attr "y" (fn [o] (int (+ (.-y (.-target o)) 2))))
+          (.attr "height" (fn [o] (if-not (clojure.string/blank?
+                                       (.-word (.-target o))) 14 0)))
           (.attr "fill" "#FFFFFF")
           (.transition)
           (.delay (fn [d i] (* i delay-in-ms)))
-          (.attr "width" (fn [o] (if (not= (.-word (.-target o)) "")
+          (.attr "width" (fn [o] (if-not (clojure.string/blank?
+                                          (.-word (.-target o)))
                                    (get-node-length o) 0))))
       (-> node-content ; word
           (.append "text")
           (.transition)
           (.delay (fn [d i] (* i delay-in-ms)))
           (.text (fn [o] (.-word (.-target o))))
-          (.attr "x" (fn [o] (int (- (.-x (.-target o))
-                                     (/ (get-node-length o) 2)))))
-          (.attr "y" (fn [o] (int (+ (.-y (.-target o)) 10))))
+          (.attr "x" (fn [o] (+ 3 (int (- (.-x (.-target o))
+                                     (/ (get-node-length o) 2))))))
+          (.attr "y" (fn [o] (int (+ (.-y (.-target o)) 12))))
           (.attr "fill" "black"))
       (-> node-content ; part of speech
           (.append "text")
@@ -154,7 +170,7 @@
                         (sort-by val)
                         reverse
                         (take 5))]
-    [:table {:class "table table-striped"}
+      [:table {:class "table table-striped"}
        [:tr [:td "# Nodes: "] [:td (count tree-nodes)]]
        [:tr [:td "# Words: "] [:td (count (clojure.string/split
                                                    @start-text

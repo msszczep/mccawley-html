@@ -23,4 +23,3 @@ http://p2p.wrox.com/access/32197-calculate-character-widths.html
 TODO:
 1 Pad nodes in tree
 2 Handle borders/margins for adjacent nodes
-3 Implement delay of stats
