@@ -25,17 +25,17 @@
                    "WRB" "#FF00FF" "WHADVP" "#FF00FF" "PDT" "#FF1493" "SBARQ" "#800080"
                    "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00" "ADJP" "#FF8C00"
                    "PRT" "#000080" "RP" "#000080" "SINV" "#800080" "FW" "#000000"
-                   "LS" "#8B4513" "SYM" "#2E8B57" "WP$" "#9932CC"}
+                   "LS" "#8B4513" "SYM" "#2E8B57" "WP$" "#9932CC" "NNPS" "#DC143C"}
         char-width {\. 4, \a 8, \b 8, \c 8, \d 8, \e 8, \f 4,
                     \g 8, \h 8, \i 4, \j 4, \k 8, \l 4,
-                    \m 8, \n 8, \o 8, \p 8, \r 8, \s 8, \t 4,
+                    \m 8, \n 8, \o 8, \p 8, \q 8, \r 8, \s 8, \t 4,
                     \u 8, \v 8, \w 8, \x 8, \y 8, \z 8, \0 10, \1 10,
                     \2 10, \3 10, \4 10, \5 10, \6 10, \7 10, \8 10,
                     \9 10, \A 10, \B 10, \C 10, \D 10, \E 10, \F 10,
                     \G 10, \H 10, \I 5, \J 10, \K 10, \L 10, \M 10,
-                    \N 10, \O 10, \P 10, \R 10, \S 10, \T 10, \U 10, \V 10
-                    \W 10, \X 10, \Y 10, \Z 10, \( 10, \) 10, \- 10,
-                    \– 10, \— 10, \, 4}
+                    \N 10, \O 10, \P 10, \Q 10, \R 10, \S 10, \T 10,
+                    \U 10, \V 10 \W 10, \X 10, \Y 10, \Z 10, \( 10,
+                    \) 10, \- 10, \– 10, \— 10, \, 4}
         svg (-> js/d3
                 (.select "svg")
                 (.attr "width" "1000")
@@ -75,7 +75,7 @@
           (.transition)
           (.delay (fn [d i] (* i delay-in-ms)))
           (.attr "d" (fn [i] (path-drawer i)))
-          (.attr "stroke" "black")
+          (.attr "stroke" "gray")
           (.attr "stroke-width" "2")
           (.attr "fill" "none"))
       (-> node-content ; rectangle for part of speech
