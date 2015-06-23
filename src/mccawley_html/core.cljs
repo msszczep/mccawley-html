@@ -26,6 +26,10 @@
                    "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00" "ADJP" "#FF8C00"
                    "PRT" "#000080" "RP" "#000080" "SINV" "#800080" "FW" "#000000"
                    "LS" "#8B4513" "SYM" "#2E8B57" "WP$" "#9932CC" "NNPS" "#DC143C"}
+        pos-color-props {"IN" "#FF8C00" "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00"
+                         "VB" "#FF8C00" "VBD" "#FF8C00" "VBG" "#FF8C00" "VBN" "#FF8C00"
+                         "VBP" "#FF8C00" "VBZ" "#FF8C00" "TO" "#FF8C00" "RB" "#FF8C00"
+                         "RBR" "#FF8C00" "RBS" "#FF8C00"}
         char-width {\. 4, \a 8, \b 8, \c 8, \d 8, \e 8, \f 4,
                     \g 8, \h 8, \i 4, \j 4, \k 8, \l 4,
                     \m 8, \n 8, \o 8, \p 8, \q 8, \r 8, \s 8, \t 4,
@@ -139,13 +143,24 @@
                                    (remove empty?)
                                    count)
 
-          ;; Idea to calculate depth: Take the sequence of the angled brackets
-          ;; in a parsed tree; the sequence reflects the tree's gross
-          ;; structure.  Replace each left-bracket with 1, replace each
-          ;; right-bracket with -1, make an additive sequence of the resulting
-          ;; values, find the maximum result of that sequence (the tree's
-          ;; depth) and subtract two to account for the ROOT and S nodes which
-          ;; we don't count in the displayed tree.
+          num-of-props (->> (get-tree-seq :pos)
+                            (filter #{"JJ" "JJR" "JJS" "VB" "VBD" "VBG" "VBN"
+                                      "VBP" "VBZ" "TO" "RB" "RBR" "RBS"})
+                            count)
+
+          num-of-words (count (clojure.string/split @start-text #"\s+"))
+
+          idea-density (->> (/ (float num-of-props) num-of-words)
+                            (* 10)
+                            int)
+
+          ;; Idea to calculate depth (see below): Take the sequence of
+          ;; the angled brackets in a parsed tree; the sequence reflects
+          ;; the tree's gross structure.  Replace each left-bracket with 1,
+          ;; replace each right-bracket with -1, make an additive sequence
+          ;; of the resulting values, find the maximum result of that sequence
+          ;; (the tree's depth) and subtract two to remove the ROOT and
+          ;; topmost-S nodes which we don't count in the displayed tree.
           ;;
           ;; For example, a tree with the gross structure: [[[][[[]]]]]
           ;; gets transformed into the sequence  (1 1 1 -1 1 1 1 -1 -1 -1 -1 -1)
@@ -172,10 +187,10 @@
                         (take 5))]
       [:table {:class "table table-striped"}
        [:tr [:td "# Nodes: "] [:td (count tree-nodes)]]
-       [:tr [:td "# Words: "] [:td (count (clojure.string/split
-                                                   @start-text
-                                                   #"\s+"))]]
+       [:tr [:td "# Words: "] [:td num-of-words]]
        [:tr [:td "# Parsed words: "] [:td num-of-parsed-words]]
+       [:tr [:td "# Propositions: "] [:td num-of-props]]
+       [:tr [:td "# Props per 10 words: "] [:td idea-density]]
        [:tr [:td "Max depth: "] [:td (str max-depth)]]
        [:tr [:td "Most frequent nodes:"] [:td " "]]
        (map (fn [x] [:tr [:td (first x)] [:td (last x)]]) top-five)])))
