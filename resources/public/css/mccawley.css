@@ -38,3 +38,8 @@ body {
   padding-right: 10px;
   margin-right: 10px;
 }
+
+svg rect {
+  stroke: gray;
+  stroke-width: 1;
+}

@@ -20,6 +20,3 @@ http://www.w3schools.com/cssref/css_colornames.asp
 Calculate Character Widths
 http://p2p.wrox.com/access/32197-calculate-character-widths.html
 
-TODO:
-1 Pad nodes in tree
-2 Handle borders/margins for adjacent nodes

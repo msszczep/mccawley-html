@@ -181,7 +181,7 @@
        (map (fn [x] [:tr [:td (first x)] [:td (last x)]]) top-five)])))
 
 
-;; Handle GET request to our external service
+;; Handle GET request to mccawley-api
 (defn handler [response]
   (do
     (reset! parsed-text (:parsed-text response))
