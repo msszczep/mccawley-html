@@ -26,10 +26,12 @@
                    "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00" "ADJP" "#FF8C00"
                    "PRT" "#000080" "RP" "#000080" "SINV" "#800080" "FW" "#000000"
                    "LS" "#8B4513" "SYM" "#2E8B57" "WP$" "#9932CC" "NNPS" "#DC143C"}
-        pos-color-props {"IN" "#FF8C00" "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00"
-                         "VB" "#FF8C00" "VBD" "#FF8C00" "VBG" "#FF8C00" "VBN" "#FF8C00"
-                         "VBP" "#FF8C00" "VBZ" "#FF8C00" "TO" "#FF8C00" "RB" "#FF8C00"
-                         "RBR" "#FF8C00" "RBS" "#FF8C00"}
+
+        pos-color-props {"JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00"
+                   "VB" "#FF8C00" "VBD" "#FF8C00" "VBG" "#FF8C00" "VBN" "#FF8C00"
+                   "VBP" "#FF8C00" "VBZ" "#FF8C00" "TO" "#FF8C00" "RB" "#FF8C00"
+                   "RBR" "#FF8C00" "RBS" "#FF8C00" "PP" "#FF8C00"}
+
         char-width {\. 4, \a 8, \b 8, \c 8, \d 8, \e 8, \f 4,
                     \g 8, \h 8, \i 4, \j 4, \k 8, \l 4,
                     \m 8, \n 8, \o 8, \p 8, \q 8, \r 8, \s 8, \t 4,
@@ -126,74 +128,22 @@
           (.attr "fill" "white")))))
 
 
-;; compute and display stats
-(defn compute-tree-stats [tree]
-  (letfn [(get-tree-seq [node-type]
-           ;; function to get a sequence of all the nodes of a given type
-                        (->> (tree-seq #(or (map? %) (vector? %))
-                                       identity
-                                       (reader/read-string tree))
-                             (filter #(and (map? %) (node-type %)))
-                             (map node-type)))]
-
-    (let [tree-nodes (rest (get-tree-seq :pos))
-          ;; using rest is necessary since we don't consider ROOT
-
-          num-of-parsed-words (->> (get-tree-seq :word)
-                                   (remove empty?)
-                                   count)
-
-          num-of-props (->> (get-tree-seq :pos)
-                            (filter #{"JJ" "JJR" "JJS" "VB" "VBD" "VBG" "VBN"
-                                      "VBP" "VBZ" "TO" "RB" "RBR" "RBS"})
-                            count)
-
-          num-of-words (count (clojure.string/split @start-text #"\s+"))
-
-          idea-density (->> (/ (float num-of-props) num-of-words)
-                            (* 10)
-                            int)
-
-          ;; Idea to calculate depth (see below): Take the sequence of
-          ;; the angled brackets in a parsed tree; the sequence reflects
-          ;; the tree's gross structure.  Replace each left-bracket with 1,
-          ;; replace each right-bracket with -1, make an additive sequence
-          ;; of the resulting values, find the maximum result of that sequence
-          ;; (the tree's depth) and subtract two to remove the ROOT and
-          ;; topmost-S nodes which we don't count in the displayed tree.
-          ;;
-          ;; For example, a tree with the gross structure: [[[][[[]]]]]
-          ;; gets transformed into the sequence  (1 1 1 -1 1 1 1 -1 -1 -1 -1 -1)
-          ;; which becomes the additive sequence (1 2 3  2 3 4 5  4  3  2  1  0)
-          ;; whose maximum value is 5, and whose depth for our purposes is
-          ;; 5 - 2 = 3.
-
-          max-depth (->> (loop [input-seq (map #(if (= % "[") 1 -1)
-                                               (re-seq #"[\[\]]" tree))
-                                output-seq [0]]
-                           (if (empty? input-seq)
-                             output-seq
-                             (recur (rest input-seq)
-                                    (conj output-seq
-                                          (+ (last output-seq)
-                                             (first input-seq))))))
-                         (apply max)
-                         dec
-                         dec)
-          top-five (->> tree-nodes
-                        frequencies
-                        (sort-by val)
-                        reverse
-                        (take 5))]
+;; display stats
+(defn output-tree-stats [response]
+  (let [idea-density (->> (/ (float (:num-props response))
+                             (:num-words response))
+                          (* 10)
+                          int)]
       [:table {:class "table table-striped"}
-       [:tr [:td "# Nodes: "] [:td (count tree-nodes)]]
-       [:tr [:td "# Words: "] [:td num-of-words]]
-       [:tr [:td "# Parsed words: "] [:td num-of-parsed-words]]
-       [:tr [:td "# Propositions: "] [:td num-of-props]]
+       [:tr [:td "# Nodes: "] [:td (:num-nodes response)]]
+       [:tr [:td "# Words: "] [:td (:num-words response)]]
+       [:tr [:td "# Parsed words: "] [:td (:num-tokens response)]]
+       [:tr [:td "# Propositions: "] [:td (:num-props response)]]
        [:tr [:td "# Props per 10 words: "] [:td idea-density]]
-       [:tr [:td "Max depth: "] [:td (str max-depth)]]
+       [:tr [:td "Max depth: "] [:td (:max-depth response)]]
        [:tr [:td "Most frequent nodes:"] [:td " "]]
-       (map (fn [x] [:tr [:td (first x)] [:td (last x)]]) top-five)])))
+       (map (fn [x] [:tr [:td (first x)] [:td (last x)]])
+            (:top-five response))]))
 
 
 ;; Handle GET request to mccawley-api
@@ -201,7 +151,7 @@
   (do
     (reset! parsed-text (:parsed-text response))
     (display-tree @parsed-text)
-    (reset! stats-html (compute-tree-stats @parsed-text))
+    (reset! stats-html (output-tree-stats response))
     (.log js/console (:parsed-text response))))
 
 (defn error-handler [{:keys [status status-text]}]
@@ -265,6 +215,11 @@
    [:button {:on-click #(reset! start-text (get-random-sentence))
              :class "btn btn-xs btn-success"} "Random"]
    [:p]
+;   [:select {:name "pos-color-scheme"}
+;    [:option {:value "rainbow"} "Rainbow"]
+;    [:option {:value "prop"} "Propositions"]
+;   ]
+;   [:p]
    [:p @stats-html]
   ])
 
