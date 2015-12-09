@@ -9,6 +9,7 @@
 (def parsed-text (reagent/atom ""))
 (def start-text (reagent/atom ""))
 (def stats-html (reagent/atom ""))
+(def color-scheme (reagent/atom ""))
 
 ;; The displaying happens here
 (defn display-tree [tree-to-display]
@@ -26,12 +27,10 @@
                    "JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00" "ADJP" "#FF8C00"
                    "PRT" "#000080" "RP" "#000080" "SINV" "#800080" "FW" "#000000"
                    "LS" "#8B4513" "SYM" "#2E8B57" "WP$" "#9932CC" "NNPS" "#DC143C"}
-
         pos-color-props {"JJ" "#FF8C00" "JJR" "#FF8C00" "JJS" "#FF8C00"
                    "VB" "#FF8C00" "VBD" "#FF8C00" "VBG" "#FF8C00" "VBN" "#FF8C00"
                    "VBP" "#FF8C00" "VBZ" "#FF8C00" "TO" "#FF8C00" "RB" "#FF8C00"
                    "RBR" "#FF8C00" "RBS" "#FF8C00" "PP" "#FF8C00"}
-
         char-width {\. 4, \a 8, \b 8, \c 8, \d 8, \e 8, \f 4,
                     \g 8, \h 8, \i 4, \j 4, \k 8, \l 4,
                     \m 8, \n 8, \o 8, \p 8, \q 8, \r 8, \s 8, \t 4,
@@ -61,12 +60,13 @@
                          (.enter)
                          (.append "g")
                          (.attr "transform" "translate(0,0)"))
-        delay-in-ms 100]
+        delay-in-ms 100
+        color-to-use (if (= @color-scheme "props") pos-color-props pos-color)]
     (letfn [(path-drawer [i]
                          (str "M" (.-x (.-source i)) "," (+ (.-y (.-source i)) 4)
                               "L" (.-x (.-target i)) "," (.-y (.-target i))))
-            (get-pos-color [p] (if (nil? (pos-color p))
-                                 "#808080" (pos-color p)))
+            (get-pos-color [p] (if (nil? (color-to-use p))
+                                 "#808080" (color-to-use p)))
             (get-word-length [w] (->> (map char w)
                                       (map #(char-width %))
                                       (remove nil?)
@@ -215,11 +215,12 @@
    [:button {:on-click #(reset! start-text (get-random-sentence))
              :class "btn btn-xs btn-success"} "Random"]
    [:p]
-;   [:select {:name "pos-color-scheme"}
-;    [:option {:value "rainbow"} "Rainbow"]
-;    [:option {:value "prop"} "Propositions"]
-;   ]
-;   [:p]
+   [:input {:type :radio :value :rainbow :name :color-scheme
+            :on-click #(reset! color-scheme "rainbow")} "Rainbow Colors"]
+   [:p]
+   [:input {:type :radio :value :props :name :color-scheme
+            :on-click #(reset! color-scheme "props")} "Highlight Props"]
+   [:p]
    [:p @stats-html]
   ])
 
