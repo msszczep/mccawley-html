@@ -1,6 +1,6 @@
 (ns mccawley-html.core
   (:require [reagent.core :as reagent :refer [atom]]
-            [ajax.core :refer [GET POST]]
+            [ajax.core :refer [GET]]
             [cljs.reader :as reader]))
 
 (enable-console-print!)
@@ -161,7 +161,7 @@
 ;; function to call when we click on parse button
 (defn retrieve-parsed [param]
   (let [url-encoded-param (clojure.string/replace param #"," "%2C")
-        uri (str "http://localhost:3000/parse/" url-encoded-param)]
+        uri (str "http://192.241.182.149:3000/parse/" url-encoded-param)]
     (GET uri {:handler handler
               :error-handler error-handler
               :response-format :json
@@ -194,12 +194,22 @@
            "The thought of roasted buttery toffees reminds me of Christmas."
            "Nowadays people know the price of everything and the value of nothing."
            "Life appears to me too short to be spent in nursing animosity or registering wrongs."
+           "Somewhere in la Mancha in a place whose name I do not care to remember a gentleman lived not long ago, one of those who has a lance and ancient shield on a shelf and keeps a skinny nag and a greyhound for racing."
+           "The cosmos is all there is, or ever was, or ever will be."
+           "It was a bright cold day in April, and the clocks were striking thirteen."
+           "He was an old man who fished alone in a skiff in the Gulf Stream and he had gone eighty-four days now without taking a fish."
+           "To the red country and part of the gray country of Oklahoma, the last rains came gently, and they did not cut the scarred earth."
+           "It is a truth universally acknowledged, that a single man in possession of a good fortune must be in want of a wife."
+           "Many years later, as he faced the firing squad, Colonel Aureliano Buendia was to remember that distant afternoon when his father took him to discover ice."
+           "It is wrong to say that text is unstructured when there is a great deal of structure in text and we do ourselves no favor to ignore the lessons it can teach us."
+           "The outbreak of the Liberal Revolution of 1820 in Lisbon compelled Pedro I's father to return to Portugal in April 1821, leaving him to rule Brazil as regent."
+           "A screaming comes across the sky."
            ]))
 
 ;; function to render the page, react/reagent style!
 (defn display-page []
   [:div
-   [:h3 "McCawley"]
+   [:h3 "The Parse is Right"]
    [:input {:type "text"
             :size 23
             :placeholder "Type an English sentence."
