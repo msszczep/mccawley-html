@@ -5,41 +5,36 @@
   background: #eee;
 }
 
-#canvastop {
-  width: 1000px;
-  height: 50px;
-  background: #eee;
-  margin: 15px 0;
-  padding: 2px 0px 10px 10px;    
-  font-size: 13px;
-}
-
 body {
   font-family: Helvetica;
   font-size: 10px;
 }
 
-.container {
-  width: 100%;
-  min-height: 567px;
-  padding: 0px;
-  border: 3px solid #FFFFFF;
-}
-
-.container .content {
-  background-color: #FFFFFF;
-}
-
-.container .sidebar {
-  background-color: #FFFFFF;
-  width: 200px;
-  vertical-align: text-top;
-  padding-left: 10px;
-  padding-right: 10px;
-  margin-right: 10px;
+#stats-battery {
+  width: 500px;
 }
 
 svg rect {
   stroke: gray;
   stroke-width: 1;
+}
+
+#contactInfo {
+  background-color: #5BC0DE;
+  width: 1000px;
+  padding: 10px;
+  text-align: left;
+  border-radius: 10px;
+}
+
+#tpirAbout {
+  background-color: #F0AD4E;
+  width: 1000px;
+  padding: 10px;
+  text-align: left;
+  border-radius: 10px;
+}
+
+#tpirAbout .table {
+  background-color: #FFFFFF;
 }

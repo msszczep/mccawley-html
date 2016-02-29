@@ -38,7 +38,7 @@
                     \2 10, \3 10, \4 10, \5 10, \6 10, \7 10, \8 10,
                     \9 10, \A 10, \B 10, \C 10, \D 10, \E 10, \F 10,
                     \G 10, \H 10, \I 5, \J 10, \K 10, \L 10, \M 10,
-                    \N 10, \O 10, \P 10, \Q 10, \R 10, \S 10, \T 10,
+                    \N 10, \O 10, \P 10, \Q 10, \R 10, \S 13, \T 10,
                     \U 10, \V 10 \W 10, \X 10, \Y 10, \Z 10, \( 10,
                     \) 10, \- 10, \– 10, \— 10, \, 4}
         svg (-> js/d3
@@ -134,7 +134,7 @@
                              (:num-words response))
                           (* 10)
                           int)]
-      [:table {:class "table table-striped"}
+      [:table {:class "table table-striped table-bordered"}
        [:tr [:td "# Nodes: "] [:td (:num-nodes response)]]
        [:tr [:td "# Words: "] [:td (:num-words response)]]
        [:tr [:td "# Parsed words: "] [:td (:num-tokens response)]]
@@ -206,37 +206,156 @@
            "A screaming comes across the sky."
            ]))
 
-;; function to render the page, react/reagent style!
-(defn display-page []
+(defn display-interface []
   [:div
+   [:center
+   [:table {:width "1000px"}
+    [:tr [:td
    [:h3 "The Parse is Right"]
-   [:input {:type "text"
-            :size 23
-            :placeholder "Type an English sentence."
-            :value @start-text
-            :on-change #(reset! start-text (-> % .-target .-value))}]
-   [:p]
-   [:button {:on-click #(retrieve-parsed @start-text)
-             :class "btn btn-xs btn-primary"} "Parse"]
-   " "
-   [:button {:on-click #(reset-all)
-             :class "btn btn-xs btn-danger"} "Reset"]
-   " "
-   [:button {:on-click #(reset! start-text (get-random-sentence))
-             :class "btn btn-xs btn-success"} "Random"]
-   [:p]
-   [:input {:type :radio :value :rainbow :name :color-scheme
-            :on-click #(reset! color-scheme "rainbow")} "Rainbow Colors"]
-   [:p]
-   [:input {:type :radio :value :props :name :color-scheme
-            :on-click #(reset! color-scheme "props")} "Highlight Props"]
-   [:p]
-   [:p @stats-html]
-  ])
+    [:p]
+    [:button {:class "btn btn-xs btn-warning"
+              :type "button"
+              :data-toggle "collapse"
+              :data-target "#tpirAbout"
+              :aria-expanded "false"
+              :aria-controls "tpirAbout"} "About"]
+    " "
+    [:button {:on-click #(reset! start-text (get-random-sentence))
+              :class "btn btn-xs btn-success"} "Random"]
+    " "
+    [:button {:on-click #(retrieve-parsed @start-text)
+              :class "btn btn-xs btn-primary"} "Parse"]
+    " "
+    [:button {:on-click #(reset-all)
+              :class "btn btn-xs btn-danger"} "Reset"]
+    " "
+    [:button {:class "btn btn-xs btn-info"
+              :type "button"
+              :data-toggle "collapse"
+              :data-target "#contactInfo"
+              :aria-expanded "false"
+              :aria-controls "contactInfo"} "Contact"]
+    [:p]
+    [:input {:type :radio :value :rainbow :name :color-scheme
+             :on-click #(reset! color-scheme "rainbow")} " Rainbow Colors"]
+    " "
+    [:input {:type :radio :value :props :name :color-scheme
+             :on-click #(reset! color-scheme "props")} " Highlight Props"]]
+    [:td     [:textarea {:rows 4
+                :cols 100
+                :placeholder "Type an English sentence in this field, then click Parse.  A syntactic tree will be drawn in the gray box below.
+If you can't think of a sentence, click Random to get a randomly-selected English sentence.
+Click Reset to clear this field and the entire screen.
+Scroll to the bottom after clicking Parse to see some statistics."
+                :value @start-text
+                :on-change #(reset! start-text (-> % .-target .-value))}]]]]]
+    [:p]
+    [:div {:class "collapse" :id "contactInfo"}
+     "If you have any questions or concerns about this application, you may email the developer,
+     mitchell at szcz dot org."
+     [:p]
+     "Github forks and pull requests to the "
+     [:a {:href "http://github.com/msszczep/mccawley-api"} "back end API"] " and "
+     [:a {:href "http://github.com/msszczep/mccawley-html"} "front end HTML"]
+     " are welcome."
+     [:p]
+     "To close this window, simply click the Contact button above."
+     ]
+    [:p]
+    [:div {:class "collapse" :id "tpirAbout"}
+     "The Parse is Right is a web app built by " [:a {:href "http://www.szcz.org"} "Mitchell Szczepanczyk"]
+     " that dynamically draws a syntactic tree of an English sentence typed into the text box at the
+     top of this app.  The tree appears in the large gray box below.  An assortment of useful statistics
+     appears below the gray box after the Parse button is clicked.  "
+     [:p]
+     "To clear the statistics, the gray box, and the text, simply click the Reset button.  You can
+     select one of a pre-programmed set of random English sentences by clicking the Random button.
+     You have two color schemes to choose from: Rainbow Colors (which uses an assortment of colors)
+     or Highlight Propositions (which colors what are formally called Propositions in a shade of orange
+     and colors all other nodes as gray)"
+      [:p]
+     "The Parse is Right uses the Stanford CoreNLP library for parsing English, the part-of-speech
+     tags in the Penn Treebank Project (listed below for convenience), and is written in the Clojure
+     and ClojureScript programming languages.  The source code for this website is
+     online, for the " [:a {:href "http://github.com/msszczep/mccawley-api"} "back end API"] " and "
+     [:a {:href "http://github.com/msszczep/mccawley-html"} "front end HTML"] "."
+      [:p]
+     "For reference, here are the part-of-speech tags in the Penn Treebank Project, used in this app."
+     [:p]
+     [:center
+     [:table {:class "table table-striped table-bordered"}
+      [:tr [:th "Abbrev."] [:th "Brief Explanation"] [:th "Examples"] [:th "Color"]]
+      [:tr [:td "CC"] [:td "Coordinating Conjunction"] [:td "and, or, but"] [:td "Gold"]]
+      [:tr [:td "CD"] [:td "Cardinal Number"] [:td "first, second, third"] [:td "Salmon"]]
+      [:tr [:td "DT"] [:td "Determiner"] [:td "a, an, the"] [:td "Pink"]]
+      [:tr [:td "EX"] [:td "Existential there"] [:td "There lived a mouse..."] [:td "Midnight blue"]]
+      [:tr [:td "FW"] [:td "Foreign word"] [:td "savoire-faire"] [:td "Black"]]
+      [:tr [:td "IN"] [:td "Preposition or subordinating conjunction"] [:td "of, by, with"] [:td "Green"]]
+      [:tr [:td "JJ"] [:td "Adjective"] [:td "blue, dry, angry"] [:td "Dark orange"]]
+      [:tr [:td "JJR"] [:td "Adjective, comparative"] [:td "faster, higher, stronger"] [:td "Dark orange"]]
+      [:tr [:td "JJS"] [:td "Adjective, superlative"] [:td "fastest, highest, strongest"] [:td "Dark orange"]]
+      [:tr [:td "LS"] [:td "List item marker"] [:td "Firstly, secondly..."] [:td "Brown"]]
+      [:tr [:td "MD"] [:td "Modal"] [:td "can, would, should"] [:td "Turquoise"]]
+      [:tr [:td "NN"] [:td "Noun, singular or mass"] [:td "world, house, salt"] [:td "Red"]]
+      [:tr [:td "NNS"] [:td "Noun, plural"] [:td "dogs, alumni, glasses"] [:td "Red"]]
+      [:tr [:td "NNP"] [:td "Proper noun, singular"] [:td "France, Olympic"] [:td "Red"]]
+      [:tr [:td "NNPS"] [:td "Proper noun, plural"] [:td "Jupiters, Sarahs"] [:td "Red"]]
+      [:tr [:td "PDT"] [:td "Predeterminer"] [:td "all, both"] [:td "Deep pink"]]
+      [:tr [:td "POS"] [:td "Possessive ending"] [:td "'s"] [:td "Maroon"]]
+      [:tr [:td "PRP"] [:td "Personal pronoun"] [:td "She, it, me"] [:td "Bright red"]]
+      [:tr [:td "PRP$"] [:td "Possessive pronoun"] [:td "My, our, their"] [:td "Bright red"]]
+      [:tr [:td "RB"] [:td "Adverb"] [:td "truly, madly, deeply"] [:td "Yellow"]]
+      [:tr [:td "RBR"] [:td "Adverb, comparative"] [:td "earlier, faster, quicker"] [:td "Yellow"]]
+      [:tr [:td "RBS"] [:td "Adverb, superlative"] [:td "earliest, best"] [:td "Yellow"]]
+      [:tr [:td "RP"] [:td "Particle"] [:td "Up"] [:td "Navy blue"]]
+      [:tr [:td "SYM"] [:td "Symbol"] [:td "&, $, %"] [:td "Seagreen"]]
+      [:tr [:td "TO"] [:td "to"] [:td "-"] [:td "Green"]]
+      [:tr [:td "UH"] [:td "Interjection"] [:td "Wow!"] [:td "Violet"]]
+      [:tr [:td "VB"] [:td "Verb, base form"] [:td "eat, drink, love"] [:td "Blue"]]
+      [:tr [:td "VBD"] [:td "Verb, past tense"] [:td "ate, drank, loved"] [:td "Blue"]]
+      [:tr [:td "VBG"] [:td "Verb, gerund or present participle"] [:td "eating, drinking, loving"] [:td "Blue"]]
+      [:tr [:td "VBN"] [:td "Verb, past participle"] [:td "eaten, gone"] [:td "Blue"]]
+      [:tr [:td "VBP"] [:td "Verb, non-3rd person singular present"] [:td "fight, want"] [:td "Blue"]]
+      [:tr [:td "VBZ"] [:td "Verb, 3rd person singular present"] [:td "fights, wants"] [:td "Blue"]]
+      [:tr [:td "WDT"] [:td "Wh-determiner"] [:td "whereupon"] [:td "Dark orchid"]]
+      [:tr [:td "WP"] [:td "Wh-pronoun"] [:td "who, what, when"] [:td "Light purple"]]
+      [:tr [:td "WP$"] [:td "Possessive wh-pronoun"] [:td "Whose"] [:td "Dark orchid"]]
+      [:tr [:td "WRB"] [:td "Wh-adverb"] [:td "When, how, why"] [:td "Magenta"]]]]
+     [:p]
+     "Here is a table explaining some of the constituents used in the app:"
+     [:p]
+     [:center
+     [:table {:class "table table-striped table-bordered"}
+      [:tr [:th "Abbrev."] [:th "Brief Explanation"] [:th "Color"]]
+      [:tr [:td "NP"] [:td "Noun phrase"] [:td "Red"]]
+      [:tr [:td "PP"] [:td "Prepositional phrase"] [:td "Green"]]
+      [:tr [:td "S"] [:td "Sentence"] [:td "Purple"]]
+      [:tr [:td "SBAR"] [:td "Clause introduced by a (possibly empty) subordinating conjunction."] [:td "Purple"]]
+      [:tr [:td "SBARQ"] [:td "Direct question introduced by a wh-word or a wh-phrase."] [:td "Purple"]]
+      [:tr [:td "VP"] [:td "Verb phrase"] [:td "Blue"]]
+      [:tr [:td "WHNP"] [:td "WH-noun phrase"] [:td "Light purple"]]]]
+     [:p]
+     "A fuller list may be found " [:a {:href "https://gist.github.com/nlothian/9240750"} "here"] "."
+     [:p]
+     "Here is a table explaining the statistics that appear at the bottom of the page:"
+     [:p]
+     [:center
+      [:table {:class "table table-striped table-bordered"}
+       [:tr [:th "Abbrev."] [:th "Brief Explanation"]]
+       [:tr [:td "Nodes"] [:td "The number of squares in the tree, coinciding roughly with the constituents and words."]]
+       [:tr [:td "Words"] [:td "The number of words in the sentences, broken up by spaces."]]
+       [:tr [:td "Parsed Words"] [:td "The number of parsed words in the sentences, broken up by nodes."]]
+       [:tr [:td "Propositions"] [:td "The number of propositions (idea-bearing units), coinciding with verbs, adjectives, adverbs, and prepositional phrases."]]
+       [:tr [:td "Props per 10 words"] [:td "The number of propositions, multiplied by 10, divided by the number of words, and rounded down."]]
+       [:tr [:td "Max depth"] [:td "The number of nodes drawn deepest point of the tree, starting with a count of zero at the top."]]
+       [:tr [:td "Most frequent nodes"] [:td "The five most common node types in the tree, with a count of each."]]]]
+     [:p]
+     "To close this window, simply click the About button above."]])
 
-(defn display-top []
-  [:p @start-text])
+(defn display-stats []
+  [:p @stats-html])
+
 
 (defn main []
-  (reagent/render-component [display-page] (.getElementById js/document "app"))
-  (reagent/render-component [display-top] (.getElementById js/document "canvastop")))
+  (reagent/render-component [display-interface] (.getElementById js/document "app"))
+  (reagent/render-component [display-stats] (.getElementById js/document "stats-battery")))
